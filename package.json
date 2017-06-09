@@ -1,0 +1,58 @@
+{
+  "name": "flubber",
+  "version": "0.1.0",
+  "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
+  "main": "build/flubber.min.js",
+  "scripts": {
+    "test": "babel-tape-runner 'test/**-test.js'",
+    "pretest": "rm -rf build && mkdir build && rollup --config rollup.config.js",
+    "build": "npm run pretest && uglifyjs -m -c -- build/flubber.js > build/flubber.min.js"
+  },
+  "module": "index",
+  "jsnext:main": "index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veltman/flubber.git"
+  },
+  "keywords": [
+    "shape",
+    "morph",
+    "tween",
+    "svg",
+    "animation",
+    "triangulation"
+  ],
+  "author": "Noah Veltman (@veltman)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/veltman/flubber/issues"
+  },
+  "homepage": "https://github.com/veltman/flubber#readme",
+  "devDependencies": {
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.4.0",
+    "babel-tape-runner": "^2.0.1",
+    "rollup": "^0.41.6",
+    "rollup-plugin-buble": "^0.15.0",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^2.1.1",
+    "tape": "^4.6.3",
+    "uglify-js": "^2.8.20"
+  },
+  "dependencies": {
+    "d3-array": "^1.2.0",
+    "d3-polygon": "^1.0.3",
+    "earcut": "^2.1.1",
+    "svg-path-properties": "^0.2.1",
+    "svgpath": "^2.2.1",
+    "topojson-client": "^3.0.0"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ],
+    "plugins": [
+      "add-module-exports"
+    ]
+  }
+}
