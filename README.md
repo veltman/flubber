@@ -31,11 +31,56 @@ var flubber = require("flubber"); // Node classic
 import { interpolate } from "flubber" // ES6
 ```
 
+### How to use
+
+Flubber mostly expects your shape inputs to be either an SVG path string or an array of `[x, y]` points (a "ring"):
+
+```js
+"M100,100 L200,100 L150,200Z" // A triangle as a path string
+[[100, 100], [200, 100], [150, 200]] // A triangle as a ring
+```
+
+Flubber methods return **interpolators**, functions that you can call later with a value from 0 to 1 to get back the corresponding shape, where 0 is the beginning of the animation and 1 is the end.
+
+Using D3, usage could look something like:
+
+```js
+var triangle = [[1, 1], [2, 1], [1.5, 2]],
+    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+
+var interpolator = flubber.interpolate(triangle, pentagon);
+
+d3.select("path")
+    .transition()
+    .attrTween("d", function(){ return interpolator; });
+```
+
+Without D3, usage might look something like this, in semi-pseudocode:
+```js
+// Mixing and matching input types is OK
+var triangle = "M1,1 L2,1 L1.5,2 Z",
+    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+
+var interpolator = flubber.interpolate(triangle, pentagon);
+
+requestAnimationFrame(draw);
+
+function draw(time) {
+    var t = howFarAlongTheAnimationIsOnAScaleOfZeroToOne(time);
+    myPathElement.setAttribute("d", interpolator(t));
+    if (t < 1) {
+        requestAnimationFrame(draw);
+    }
+}
+```
+
+Note: it doesn't matter whether your ring has a closing point identical to the first point.
+
 ### API
 
 #### flubber.interpolate(fromShape, toShape [, options])
 
-`fromShape` and `toShape` should each be an array of points (a "ring") or an SVG path string. If your SVG path string includes holes or multiple shapes in a single string, everything but the first outer shape will be ignored.
+`fromShape` and `toShape` should each be a ring or an SVG path string. If your path string includes holes or multiple shapes in a single string, everything but the first outer shape will be ignored.
 
 This returns a function that takes a value `t` from 0 to 1 and returns the in-between shape:
 
@@ -56,9 +101,25 @@ interpolator(1); // returns an SVG octagon path string
 
 Like `interpolate()`, but for the specific case of transforming the shape to a circle centered at `[x, y]` with radius `r`.
 
+```js
+var interpolator = flubber.toCircle(triangle, 100, 100, 10);
+
+interpolator(0); // returns an SVG triangle path string
+interpolator(0.5); // returns something halfway between the triangle and the circle
+interpolator(1); // returns a circle path string centered at 100, 100 with a radius of 10
+```
+
 #### flubber.toRect(fromShape, x, y, width, height[, options])
 
 Like `interpolate()`, but for the specific case of transforming the shape to a rectangle with the upper-left corner `[x, y]` and the dimensions `width` x `height`.
+
+```js
+var interpolator = flubber.toRect(triangle, 10, 50, 100, 200);
+
+interpolator(0); // returns an SVG triangle path string
+interpolator(0.5); // returns something halfway between the triangle and the rectangle
+interpolator(1); // returns a rectangle path string from [10, 50] in the upper left to [110, 250] in the lower right
+```
 
 #### flubber.fromCircle(x, y, r, toShape[, options])
 
@@ -70,7 +131,7 @@ Like `toRect()` but reversed.
 
 #### flubber.separate(fromShape, toShapeList[, options])
 
-If you're trying to interpolate between a single shape and multiple shapes (for example, a group of three circles turning into a single big circle), this method will break your shapes into pieces so you can animate between the two sets.  This isn't terribly performant but it mostly gets the job done.
+If you're trying to interpolate between a single shape and multiple shapes (for example, a group of three circles turning into a single big circle), this method will break your shapes into pieces so you can animate between the two sets.  This isn't terribly performant and has some quirks but it tends to get the job done.
 
 `fromShape` should be a ring or SVG path string, and `toShapeList` should be an array of them.
 
@@ -79,9 +140,23 @@ The options are the same as for `interpolate()`, with the additional option of `
 If `single` is false, this returns an array of `n` interpolator functions, where `n` is the length of `toShapeList`.  If `single` is set to true this returns one interpolator that combines things into one giant path string or one big array of rings.
 
 ```js
-flubber.separate([A], [B, C, D]); // returns an array of three interpolator functions
+// returns an array of two interpolator functions
+var interpolators = flubber.separate(triangle, [square, otherSquare]);
 
-flubber.separate([A], [B, C, D], { single: true }); // returns a single interpolator function
+d3.selectAll("path")
+    .data(interpolators)
+    .transition()
+    .attrTween("d", function(interpolator) { return interpolator; });
+```
+
+```js
+// returns a single interpolator function
+var combinedInterpolator = flubber.separate(triangle, [square, otherSquare], { single: true });
+
+// This one path element will be two squares at the end
+d3.select("path")
+    .transition()
+    .attrTween("d", function() { return combinedInterpolator; });
 ```
 
 #### flubber.combine(fromShapeList, toShape[, options])
