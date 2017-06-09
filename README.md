@@ -15,7 +15,7 @@ The goal of this library is to provide a best-guess interpolation for any two ar
 In a browser (exposes the `flubber` global):
 
 ````html
-<script src="https://unpkg.com/flubber/"></script>
+<script src="https://unpkg.com/flubber"></script>
 ```
 
 With NPM:
