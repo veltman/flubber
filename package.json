@@ -1,8 +1,9 @@
 {
   "name": "flubber",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
   "main": "build/flubber.min.js",
+  "browser": "build/flubber.min.js",
   "scripts": {
     "test": "babel-tape-runner 'test/**-test.js'",
     "pretest": "rm -rf build && mkdir build && rollup --config rollup.config.js",
