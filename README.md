@@ -97,8 +97,9 @@ interpolator(1); // returns an SVG octagon path string
 `string`: whether to output results as an SVG path string or an array of points. (default: `true`)  
 `maxSegmentLength`: the lower this number is, the smoother the resulting animation will be, at the expense of performance. Represents a number in pixels (if no transforms are involved). Set it to `false` or `Infinity` for no smoothing. (default: `10`)
 
-[.interpolate() in action #1](https://veltman.github.io/flubber/demos/basic-svg.html)
-[.interpolate() in action #2](https://veltman.github.io/flubber/demos/basic-array.html)
+[.interpolate() in action with a ring as input](https://veltman.github.io/flubber/demos/basic-svg.html)
+
+[.interpolate() in action with a path string as input](https://veltman.github.io/flubber/demos/basic-array.html)
 
 #### flubber.toCircle(fromShape, x, y, r[, options])
 
