@@ -1,6 +1,6 @@
 {
   "name": "flubber",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
   "main": "build/flubber.min.js",
   "browser": "build/flubber.min.js",
