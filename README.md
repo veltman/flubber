@@ -97,6 +97,9 @@ interpolator(1); // returns an SVG octagon path string
 `string`: whether to output results as an SVG path string or an array of points. (default: `true`)  
 `maxSegmentLength`: the lower this number is, the smoother the resulting animation will be, at the expense of performance. Represents a number in pixels (if no transforms are involved). Set it to `false` or `Infinity` for no smoothing. (default: `10`)
 
+[.interpolate() in action #1](https://veltman.github.io/flubber/demos/basic-svg.html)
+[.interpolate() in action #2](https://veltman.github.io/flubber/demos/basic-array.html)
+
 #### flubber.toCircle(fromShape, x, y, r[, options])
 
 Like `interpolate()`, but for the specific case of transforming the shape to a circle centered at `[x, y]` with radius `r`.
@@ -109,6 +112,8 @@ interpolator(0.5); // returns something halfway between the triangle and the cir
 interpolator(1); // returns a circle path string centered at 100, 100 with a radius of 10
 ```
 
+[.toCircle() in action](https://veltman.github.io/flubber/demos/circles.html)
+
 #### flubber.toRect(fromShape, x, y, width, height[, options])
 
 Like `interpolate()`, but for the specific case of transforming the shape to a rectangle with the upper-left corner `[x, y]` and the dimensions `width` x `height`.
@@ -120,6 +125,8 @@ interpolator(0); // returns an SVG triangle path string
 interpolator(0.5); // returns something halfway between the triangle and the rectangle
 interpolator(1); // returns a rectangle path string from [10, 50] in the upper left to [110, 250] in the lower right
 ```
+
+[.toRect() in action](https://veltman.github.io/flubber/demos/rects.html)
 
 #### flubber.fromCircle(x, y, r, toShape[, options])
 
@@ -149,6 +156,8 @@ d3.selectAll("path")
     .attrTween("d", function(interpolator) { return interpolator; });
 ```
 
+[.separate() in action](https://veltman.github.io/flubber/demos/multiple-distinct.html)
+
 ```js
 // returns a single interpolator function
 var combinedInterpolator = flubber.separate(triangle, [square, otherSquare], { single: true });
@@ -158,6 +167,8 @@ d3.select("path")
     .transition()
     .attrTween("d", function() { return combinedInterpolator; });
 ```
+
+[.separate({ single: true }) in action](https://veltman.github.io/flubber/demos/multiple.html)
 
 #### flubber.combine(fromShapeList, toShape[, options])
 
