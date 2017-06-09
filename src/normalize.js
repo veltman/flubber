@@ -8,8 +8,9 @@ export default function normalizeRing(ring, maxSegmentLength) {
   let points, area, skipBisect;
 
   if (typeof ring === "string") {
-    ring = pathStringToRing(ring, maxSegmentLength);
-    skipBisect = true;
+    let converted = pathStringToRing(ring, maxSegmentLength);
+    ring = converted.ring;
+    skipBisect = converted.skipBisect;
   } else if (!Array.isArray(ring)) {
     throw new TypeError(INVALID_INPUT);
   }

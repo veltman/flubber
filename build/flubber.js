@@ -1508,7 +1508,7 @@ var index = svgpath;
 var length = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
 var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
 
-var parse = function(path) {
+var parse$1 = function(path) {
   var data = [];
 	path.replace(segment, function(_, command, args){
 		var type = command.toLowerCase();
@@ -2151,7 +2151,7 @@ var svgPathProperties = function(svgString) {
 
   function svgProperties(string){
     if(!string){return null;}
-    var parsed = parse(string);
+    var parsed = parse$1(string);
     var cur = [0, 0];
     var prev_point = [0, 0];
     var curve;
@@ -2319,17 +2319,13 @@ var svgPathProperties = function(svgString) {
 
 var INVALID_INPUT = "All shapes must be supplied as arrays of multiple [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
 
-function parsePath(str) {
-  return new index(str)
-    .abs();
+function parse$$1(str) {
+  return new index(str).abs();
 }
 
-function toPathString(ring) {
-  return "M" + ring.join("L") + "Z";
-}
-
-function splitPathString(str) {
-  return parsePath(str).toString()
+function split(parsed) {
+  return parsed
+    .toString()
     .split("M")
     .map(function (d, i) {
       d = d.trim();
@@ -2338,9 +2334,51 @@ function splitPathString(str) {
     .filter(function (d) { return d; });
 }
 
+function toPathString(ring) {
+  return "M" + ring.join("L") + "Z";
+}
+
+function splitPathString(str) {
+  return split(parse$$1(str));
+}
+
 function pathStringToRing(str, maxSegmentLength) {
-  var ringPath = splitPathString(str)[0],
-    points = [],
+  var parsed = parse$$1(str);
+
+  return exactRing(parsed, maxSegmentLength) || approximateRing(parsed, maxSegmentLength);
+}
+
+function exactRing(parsed, maxSegmentLength) {
+  var segments = parsed.segments || [],
+    ring = [];
+
+  // Straight lines only
+  if (!segments.length || segments[0][0] !== "M" || segments.some(function (d) { return !d[0].match(/M|L|H|V|Z/); })) {
+    return false;
+  }
+
+  for (var i = 0; i < segments.length; i++) {
+    var ref = segments[i];
+    var command = ref[0];
+    var x = ref[1];
+    var y = ref[2];
+    if ((command === "M" && i) || command === "Z") {
+      break;
+    } else if (command === "M" || command === "L") {
+      ring.push([x, y]);
+    } else if (command === "H") {
+      ring.push([x, ring[ring.length - 1][1]]);
+    } else if (command === "V") {
+      ring.push([ring[ring.length - 1][0], x]);
+    }
+  }
+
+  return ring.length ? { ring: ring } : false;
+}
+
+function approximateRing(parsed, maxSegmentLength) {
+  var ringPath = split(parsed)[0],
+    ring = [],
     props,
     len,
     m,
@@ -2356,10 +2394,13 @@ function pathStringToRing(str, maxSegmentLength) {
 
   for (var i = 0; i < numPoints; i++) {
     var p = m.getPointAtLength(len * i / numPoints);
-    points.push([p.x, p.y]);
+    ring.push([p.x, p.y]);
   }
 
-  return points;
+  return {
+    ring: ring,
+    skipBisect: true
+  };
 }
 
 function measure(d) {
@@ -2447,8 +2488,9 @@ function normalizeRing(ring, maxSegmentLength) {
   var points, area, skipBisect;
 
   if (typeof ring === "string") {
-    ring = pathStringToRing(ring, maxSegmentLength);
-    skipBisect = true;
+    var converted = pathStringToRing(ring, maxSegmentLength);
+    ring = converted.ring;
+    skipBisect = converted.skipBisect;
   } else if (!Array.isArray(ring)) {
     throw new TypeError(INVALID_INPUT);
   }
