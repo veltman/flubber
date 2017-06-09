@@ -93,11 +93,17 @@ Like `separate()` but reversed.
 *Note: most of these demos use D3 to keep the code concise, but this can be used with any library, or with no library at all.*
 
 [Morphing SVG paths](https://veltman.github.io/flubber/demos/basic-svg.html)
+
 [Morphing GeoJSON coordinates](https://veltman.github.io/flubber/demos/basic-array.html)
+
 [Morphing to and from circles](https://veltman.github.io/flubber/demos/circles.html)
+
 [Morphing to and from rectangles](https://veltman.github.io/flubber/demos/rects.html)
+
 [Morphing between one shape and multiple shapes](https://veltman.github.io/flubber/demos/multiple.html) (one element)
+
 [Morphing between one shape and multiple shapes](https://veltman.github.io/flubber/demos/multiple-distinct.html) (multiple elements)
+
 [Vanilla JS + Canvas](https://veltman.github.io/flubber/demos/vanilla-canvas.html) (multiple elements)
 
 ### To do
