@@ -163,6 +163,24 @@ d3.select("path")
 
 Like `separate()` but reversed.
 
+#### flubber.toPathString(ring)
+
+A helper function for converting an array of points to an SVG path string.
+
+```js
+flubber.toPathString([[1, 1], [2, 1], [1.5, 2]]);
+// Returns "M1,1L2,1L1.5,2Z"
+```
+
+#### flubber.splitPathString(pathString)
+
+A helper function for splitting an SVG path string that might contain multiple shapes into an array of one-shape path strings.
+
+```js
+flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
+// Returns ["M1,1 L2,1 L1.5,2Z", "M3,3 L4,3 L3.5,4 Z"]
+```
+
 ### Examples
 
 *Note: most of these demos use D3 to keep the code concise, but this can be used with any library, or with no library at all.*
