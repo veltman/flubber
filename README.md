@@ -27,8 +27,8 @@ npm install flubber
 And then import/require it:
 
 ```js
-import `flubber` // ES6
 var flubber = require("flubber"); // Node classic
+import { interpolate } from "flubber" // ES6
 ```
 
 ### API
