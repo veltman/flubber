@@ -2,7 +2,7 @@
 
 # flubber
 
-Some best-guess methods for smoothly interpolating and 2-D shapes.
+Some best-guess methods for smoothly interpolating between 2-D shapes.
 
 ### Why?
 
