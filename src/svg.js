@@ -2,14 +2,17 @@ import Path from "svgpath";
 import { svgPathProperties } from "svg-path-properties";
 import { INVALID_INPUT } from "./errors.js";
 
+function parsePath(str) {
+  return new Path(str)
+    .abs();
+}
+
 export function toPathString(ring) {
   return "M" + ring.join("L") + "Z";
 }
 
 export function splitPathString(str) {
-  return new Path(str)
-    .abs()
-    .toString()
+  return parsePath(str).toString()
     .split("M")
     .map((d, i) => {
       d = d.trim();

@@ -214,6 +214,7 @@ flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
 ### To do
 
 * Finish these docs
+* Maintain original vertices when polygonizing a path string
 * Deal with holes
 * Deal with curves better
 * Use curves between points for `fromCircle()` and `toCircle()`

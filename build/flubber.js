@@ -2319,14 +2319,17 @@ var svgPathProperties = function(svgString) {
 
 var INVALID_INPUT = "All shapes must be supplied as arrays of multiple [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
 
+function parsePath(str) {
+  return new index(str)
+    .abs();
+}
+
 function toPathString(ring) {
   return "M" + ring.join("L") + "Z";
 }
 
 function splitPathString(str) {
-  return new index(str)
-    .abs()
-    .toString()
+  return parsePath(str).toString()
     .split("M")
     .map(function (d, i) {
       d = d.trim();
