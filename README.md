@@ -88,7 +88,7 @@ flubber.separate([A], [B, C, D], { single: true }); // returns a single interpol
 
 Like `separate()` but reversed.
 
-### Demos
+### Examples
 
 *Note: most of these demos use D3 to keep the code concise, but this can be used with any library, or with no library at all.*
 
