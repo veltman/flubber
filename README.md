@@ -209,7 +209,9 @@ flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
 
 [Morphing between one shape and multiple shapes](https://veltman.github.io/flubber/demos/multiple-distinct.html) (multiple elements)
 
-[Vanilla JS + Canvas](https://veltman.github.io/flubber/demos/vanilla-canvas.html) (multiple elements)
+[Vanilla JS + Canvas](https://veltman.github.io/flubber/demos/vanilla-canvas.html)
+
+[Medley of different methods](https://veltman.github.io/flubber/demos/medley.html)
 
 ### To do
 
