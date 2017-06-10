@@ -36,8 +36,7 @@ function exactRing(parsed, maxSegmentLength) {
   let segments = parsed.segments || [],
     ring = [];
 
-  // Straight lines only
-  if (!segments.length || segments[0][0] !== "M" || segments.some(d => !d[0].match(/M|L|H|V|Z/))) {
+  if (!segments.length || segments[0][0] !== "M") {
     return false;
   }
 
@@ -51,6 +50,8 @@ function exactRing(parsed, maxSegmentLength) {
       ring.push([x, ring[ring.length - 1][1]]);
     } else if (command === "V") {
       ring.push([ring[ring.length - 1][0], x]);
+    } else {
+      return false;
     }
   }
 

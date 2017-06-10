@@ -2352,8 +2352,7 @@ function exactRing(parsed, maxSegmentLength) {
   var segments = parsed.segments || [],
     ring = [];
 
-  // Straight lines only
-  if (!segments.length || segments[0][0] !== "M" || segments.some(function (d) { return !d[0].match(/M|L|H|V|Z/); })) {
+  if (!segments.length || segments[0][0] !== "M") {
     return false;
   }
 
@@ -2370,6 +2369,8 @@ function exactRing(parsed, maxSegmentLength) {
       ring.push([x, ring[ring.length - 1][1]]);
     } else if (command === "V") {
       ring.push([ring[ring.length - 1][0], x]);
+    } else {
+      return false;
     }
   }
 
@@ -2580,9 +2581,23 @@ var interpolate = function(fromShape, toShape, ref) {
   var string = ref.string; if ( string === void 0 ) string = true;
 
   var fromRing = normalizeRing(fromShape, maxSegmentLength),
-    toRing = normalizeRing(toShape, maxSegmentLength);
+    toRing = normalizeRing(toShape, maxSegmentLength),
+    interpolator = interpolateRing(fromRing, toRing, string);
 
-  return interpolateRing(fromRing, toRing, string);
+  // Extra optimization for near either end with path strings
+  if (!string || (typeof fromShape !== "string" && typeof toShape !== "string")) {
+    return interpolator;
+  }
+
+  return function (t) {
+    if (t < 1e-4 && typeof fromShape === "string") {
+      return fromShape;
+    }
+    if (1 - t < 1e-4 && typeof toShape === "string") {
+      return toShape;
+    }
+    return interpolator(t);
+  };
 };
 
 function interpolateRing(fromRing, toRing, string) {
