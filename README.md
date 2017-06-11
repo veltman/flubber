@@ -4,6 +4,8 @@
 
 Some best-guess methods for smoothly interpolating between 2-D shapes.
 
+![Flubber in action](https://user-images.githubusercontent.com/2120446/27009182-b657efe8-4e3c-11e7-80eb-f8abddbdca40.gif)
+
 ### Why?
 
 Let's say you want to animate between two SVG paths or canvas shapes in a visualization. If you plug in their coordinates or their path strings to something like `d3.transition()`, it might work if the shapes *correspond* to each other really well - for example, turning a triangle into a different triangle. But once your shapes don't really correspond, you'll get unpredictable results with weird inversions and sudden jumps.
