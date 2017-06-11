@@ -2317,7 +2317,11 @@ var svgPathProperties = function(svgString) {
   return svgProperties(svgString);
 };
 
-var INVALID_INPUT = "All shapes must be supplied as arrays of multiple [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
+var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
+
+
+
+var TOO_FEW_POINTS = "Polygons must have at least three points.";
 
 function parse$$1(str) {
   return new index(str).abs();
@@ -2509,7 +2513,7 @@ function normalizeRing(ring, maxSegmentLength) {
 
   // 3+ points to make a polygon
   if (points.length < 3) {
-    throw new TypeError(INVALID_INPUT);
+    throw new TypeError(TOO_FEW_POINTS);
   }
 
   area = polygonArea(points);
