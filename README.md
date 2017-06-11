@@ -4,7 +4,7 @@
 
 Some best-guess methods for smoothly interpolating between 2-D shapes.
 
-![Flubber in action](https://user-images.githubusercontent.com/2120446/27013705-2eb5628e-4e9e-11e7-8b3a-6e1d25750933.gif)
+![Flubber in action](https://user-images.githubusercontent.com/2120446/27014160-e0ce7c04-4ea7-11e7-8da4-5dde839290eb.gif)
 
 ### Why?
 
