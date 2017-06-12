@@ -13,7 +13,8 @@ tape("Triangulate a square", function(test) {
 });
 
 tape("Create/collapse a triangulation", function(test) {
-  let square = shapes.square1(), cuts = cut(square);
+  let square = shapes.square1(),
+    cuts = cut(square);
 
   let topology = createTopology(cuts, square);
 

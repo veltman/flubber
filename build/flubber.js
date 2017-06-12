@@ -3924,8 +3924,13 @@ function separate(
   var string = ref.string; if ( string === void 0 ) string = true;
   var single = ref.single; if ( single === void 0 ) single = false;
 
-  var fromRing = normalizeRing(fromShape, maxSegmentLength),
-    fromRings = triangulate(fromRing, toShapes.length),
+  var fromRing = normalizeRing(fromShape, maxSegmentLength);
+
+  if (fromRing.length < toShapes.length + 2) {
+    addPoints(fromRing, toShapes.length + 2 - fromRing.length);
+  }
+
+  var fromRings = triangulate(fromRing, toShapes.length),
     toRings = toShapes.map(function (d) { return normalizeRing(d, maxSegmentLength); });
 
   var order = pieceOrder(fromRings, toRings),

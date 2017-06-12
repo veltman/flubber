@@ -1,5 +1,6 @@
 import { interpolateRing } from "./interpolate.js";
 import { toPathString } from "./svg.js";
+import { addPoints } from "./add.js";
 import normalizeRing from "./normalize.js";
 import triangulate from "./triangulate.js";
 import pieceOrder from "./order.js";
@@ -9,8 +10,13 @@ export function separate(
   toShapes,
   { maxSegmentLength = 10, string = true, single = false } = {}
 ) {
-  let fromRing = normalizeRing(fromShape, maxSegmentLength),
-    fromRings = triangulate(fromRing, toShapes.length),
+  let fromRing = normalizeRing(fromShape, maxSegmentLength);
+
+  if (fromRing.length < toShapes.length + 2) {
+    addPoints(fromRing, toShapes.length + 2 - fromRing.length);
+  }
+
+  let fromRings = triangulate(fromRing, toShapes.length),
     toRings = toShapes.map(d => normalizeRing(d, maxSegmentLength));
 
   let order = pieceOrder(fromRings, toRings),

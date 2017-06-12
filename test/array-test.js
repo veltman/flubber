@@ -90,3 +90,18 @@ tape("mix and match string/ring", function(test) {
 
   test.end();
 });
+
+tape("separate/combine arrays with too few points", function(test) {
+  var separator = separate(shapes.triangle1(), [shapes.square1(), shapes.square2()], {
+    maxSegmentLength: Infinity,
+    string: false
+  });
+
+  test.assert(separator.length === 2);
+
+  separator.forEach(function(fn) {
+    test.assert(Array.isArray(fn(0.5)) && fn(0.5).length === 4);
+  });
+
+  test.end();
+});
