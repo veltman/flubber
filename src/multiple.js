@@ -17,11 +17,26 @@ export function separate(
     interpolators = order.map((d, i) => interpolateRing(fromRings[d], toRings[i], string));
 
   if (single) {
-    let merged = toPathString(fromRing);
+    let multiInterpolator = string
+      ? t => interpolators.map(fn => fn(t)).join(" ")
+      : t => interpolators.map(fn => fn(t));
+
     if (string) {
-      return t => (t < 1e-4 ? merged : interpolators.map(i => i(t)).join(" "));
+      let useFrom = typeof fromShape === "string" && fromShape,
+        useTo = toShapes.every(s => typeof s === "string") && toShapes.join(" ");
+
+      if (useFrom || useTo) {
+        return t => (t < 1e-4 && useFrom) || (1 - t < 1e-4 && useTo) || multiInterpolator(t);
+      }
     }
-    return t => interpolators.map(i => i(t));
+    return multiInterpolator;
+  } else if (string) {
+    return interpolators.map((fn, i) => {
+      if (typeof toShapes[i] === "string") {
+        return t => (1 - t < 1e-4 ? toShapes[i] : fn(t));
+      }
+      return fn;
+    });
   }
 
   return interpolators;

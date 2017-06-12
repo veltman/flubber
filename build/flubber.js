@@ -3814,7 +3814,8 @@ function createTopology(triangles, ring) {
 }
 
 function collapseTopology(topology, numPieces) {
-  var geometries = topology.objects.triangles.geometries, bisect$$1 = bisector(function (d) { return d.area; }).left;
+  var geometries = topology.objects.triangles.geometries,
+    bisect$$1 = bisector(function (d) { return d.area; }).left;
 
   while (geometries.length > numPieces) {
     mergeSmallestFeature();
@@ -3931,11 +3932,26 @@ function separate(
     interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
 
   if (single) {
-    var merged = toPathString(fromRing);
+    var multiInterpolator = string
+      ? function (t) { return interpolators.map(function (fn) { return fn(t); }).join(" "); }
+      : function (t) { return interpolators.map(function (fn) { return fn(t); }); };
+
     if (string) {
-      return function (t) { return (t < 1e-4 ? merged : interpolators.map(function (i) { return i(t); }).join(" ")); };
+      var useFrom = typeof fromShape === "string" && fromShape,
+        useTo = toShapes.every(function (s) { return typeof s === "string"; }) && toShapes.join(" ");
+
+      if (useFrom || useTo) {
+        return function (t) { return (t < 1e-4 && useFrom) || (1 - t < 1e-4 && useTo) || multiInterpolator(t); };
+      }
     }
-    return function (t) { return interpolators.map(function (i) { return i(t); }); };
+    return multiInterpolator;
+  } else if (string) {
+    return interpolators.map(function (fn, i) {
+      if (typeof toShapes[i] === "string") {
+        return function (t) { return (1 - t < 1e-4 ? toShapes[i] : fn(t)); };
+      }
+      return fn;
+    });
   }
 
   return interpolators;

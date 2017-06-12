@@ -56,7 +56,8 @@ export function createTopology(triangles, ring) {
 }
 
 export function collapseTopology(topology, numPieces) {
-  const geometries = topology.objects.triangles.geometries, bisect = bisector(d => d.area).left;
+  const geometries = topology.objects.triangles.geometries,
+    bisect = bisector(d => d.area).left;
 
   while (geometries.length > numPieces) {
     mergeSmallestFeature();
