@@ -2349,10 +2349,10 @@ function splitPathString(str) {
 function pathStringToRing(str, maxSegmentLength) {
   var parsed = parse$$1(str);
 
-  return exactRing(parsed, maxSegmentLength) || approximateRing(parsed, maxSegmentLength);
+  return exactRing(parsed) || approximateRing(parsed, maxSegmentLength);
 }
 
-function exactRing(parsed, maxSegmentLength) {
+function exactRing(parsed) {
   var segments = parsed.segments || [],
     ring = [];
 
@@ -2387,7 +2387,7 @@ function approximateRing(parsed, maxSegmentLength) {
     props,
     len,
     m,
-    numPoints;
+    numPoints = 3;
 
   if (!ringPath) {
     throw new TypeError(INVALID_INPUT);
@@ -2395,7 +2395,10 @@ function approximateRing(parsed, maxSegmentLength) {
 
   m = measure(ringPath);
   len = m.getTotalLength();
-  numPoints = Math.ceil(len / maxSegmentLength);
+
+  if (maxSegmentLength && Number.isFinite(maxSegmentLength) && maxSegmentLength > 0) {
+    numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
+  }
 
   for (var i = 0; i < numPoints; i++) {
     var p = m.getPointAtLength(len * i / numPoints);
