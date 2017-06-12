@@ -17,7 +17,7 @@
 <script src="../build/flubber.min.js"></script>
 <script>
 var svg = d3.select("svg"),
-    path = svg.append("path");
+  path = svg.append("path");
 
 d3.json("lower48.topo.json", function(err, topo) {
   var states = topojson
@@ -30,14 +30,14 @@ d3.json("lower48.topo.json", function(err, topo) {
 
   function draw(i) {
     var start = states[0],
-        next = states[1],
-        height = 250,
-        width = 80 + i % 3 * 80,
-        x = 120 + i % 2 * 600,
-        y = 125;
+      next = states[1],
+      height = 250,
+      width = 80 + i % 3 * 80,
+      x = 120 + i % 2 * 600,
+      y = 125;
 
-    var outward = flubber.toRect(start, x, y, width, height, { maxSegmentLength: 20 }),
-        inward = flubber.fromRect(x, y, width, height, next, { maxSegmentLength: 20 });
+    var outward = flubber.toRect(start, x, y, width, height, { maxSegmentLength: 10 }),
+      inward = flubber.fromRect(x, y, width, height, next, { maxSegmentLength: 10 });
 
     states.push(states.shift());
 
@@ -51,7 +51,6 @@ d3.json("lower48.topo.json", function(err, topo) {
       .delay(600)
       .attrTween("d", () => inward)
       .on("end", () => draw(i + 1));
-
   }
 });
 </script>
