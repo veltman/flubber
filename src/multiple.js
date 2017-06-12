@@ -33,5 +33,8 @@ export function combine(
   { maxSegmentLength = 10, string = true, single = false } = {}
 ) {
   let interpolators = separate(toShape, fromShapes, { maxSegmentLength, string, single });
-  return single ? t => interpolators(1 - t) : interpolators.map(fn => t => fn(1 - t));
+  if (single) {
+    return t => (1-t < 1e-4 ? toShape : interpolators(1 - t));
+  }
+  return interpolators.map(fn => t => fn(1 - t));
 }
