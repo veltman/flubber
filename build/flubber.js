@@ -3952,7 +3952,10 @@ function combine$1(
   var single = ref.single; if ( single === void 0 ) single = false;
 
   var interpolators = separate(toShape, fromShapes, { maxSegmentLength: maxSegmentLength, string: string, single: single });
-  return single ? function (t) { return interpolators(1 - t); } : interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
+  if (single) {
+    return function (t) { return (1-t < 1e-4 ? toShape : interpolators(1 - t)); };
+  }
+  return interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
 }
 
 function fromCircle(x, y, radius, toShape, options) {
