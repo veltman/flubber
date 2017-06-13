@@ -35,7 +35,7 @@ import { interpolate } from "flubber" // ES6
 
 ### How to use
 
-Flubber mostly expects your shape inputs to be either an SVG path string or an array of `[x, y]` points (a "ring"):
+Flubber expects a shape input to be either an SVG path string or an array of `[x, y]` points (a "ring"):
 
 ```js
 "M100,100 L200,100 L150,200Z" // A triangle as a path string
@@ -57,7 +57,7 @@ d3.select("path")
     .attrTween("d", function(){ return interpolator; });
 ```
 
-Without D3, usage might look something like this, in semi-pseudocode:
+Without D3, usage might look something like this:
 ```js
 // Mixing and matching input types is OK
 var triangle = "M1,1 L2,1 L1.5,2 Z",
