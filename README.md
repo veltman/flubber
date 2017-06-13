@@ -218,13 +218,13 @@ flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
 ### To do
 
 * Maintain original vertices when polygonizing a path string with curves
-* Deal with holes
+* Add `force: true` option to collapse small additional polygons onto the perimeter of the largest
+* Support unclosed lines
 * Use curves between points for `fromCircle()` and `toCircle()`
+* Deal with holes?
 * Accept SVG elements as arguments instead of just path strings?
 * Add pre-simplification as an option
-* Add `force: true` option to collapse small additional polygons onto the perimeter of the largest
 * Simulated annealing or random swapping for multishape matching?
-* Support unclosed lines
 
 ### Video
 
