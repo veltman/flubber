@@ -252,6 +252,7 @@ Many thanks to:
 * Vladimir Agafonkin and Mapbox for [earcut](https://github.com/mapbox/earcut)
 * Roger Veciana Rovira for [svg-path-properties](https://github.com/rveciana/svg-path-properties)
 * Fontello for [svgpath](https://github.com/fontello/svgpath)
+* Rich Harris for [Rollup](https://github.com/rollup/rollup) and [Bublé](http://buble.surge.sh/)
 
 ### License
 
