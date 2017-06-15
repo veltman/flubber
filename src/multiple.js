@@ -76,7 +76,7 @@ export function all(
 }
 
 function interpolateSets(fromRings, toRings, { string, single, t0, t1, match = true } = {}) {
-  let order = match ? pieceOrder(fromRings, toRings) : d3.range(fromRings.length),
+  let order = match ? pieceOrder(fromRings, toRings) : fromRings.map((d, i) => i),
     interpolators = order.map((d, i) => interpolateRing(fromRings[d], toRings[i], string));
 
   if (match && Array.isArray(t0)) {
