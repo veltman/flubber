@@ -2319,6 +2319,8 @@ var svgPathProperties = function(svgString) {
 
 var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
 
+var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
+
 
 
 var TOO_FEW_POINTS = "Polygons must have at least three points.";
@@ -3934,35 +3936,17 @@ function separate(
   }
 
   var fromRings = triangulate(fromRing, toShapes.length),
-    toRings = toShapes.map(function (d) { return normalizeRing(d, maxSegmentLength); });
+    toRings = toShapes.map(function (d) { return normalizeRing(d, maxSegmentLength); }),
+    t0 = typeof fromShape === "string" && fromShape,
+    t1;
 
-  var order = pieceOrder(fromRings, toRings),
-    interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
-
-  if (single) {
-    var multiInterpolator = string
-      ? function (t) { return interpolators.map(function (fn) { return fn(t); }).join(" "); }
-      : function (t) { return interpolators.map(function (fn) { return fn(t); }); };
-
-    if (string) {
-      var useFrom = typeof fromShape === "string" && fromShape,
-        useTo = toShapes.every(function (s) { return typeof s === "string"; }) && toShapes.join(" ");
-
-      if (useFrom || useTo) {
-        return function (t) { return (t < 1e-4 && useFrom) || (1 - t < 1e-4 && useTo) || multiInterpolator(t); };
-      }
-    }
-    return multiInterpolator;
-  } else if (string) {
-    return interpolators.map(function (fn, i) {
-      if (typeof toShapes[i] === "string") {
-        return function (t) { return (1 - t < 1e-4 ? toShapes[i] : fn(t)); };
-      }
-      return fn;
-    });
+  if (single && toShapes.every(function (s) { return typeof s === "string"; })) {
+    t1 = toShapes.join(" ");
+  } else if (!single) {
+    t1 = toShapes.slice(0);
   }
 
-  return interpolators;
+  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1 });
 }
 
 function combine$1(
@@ -3977,6 +3961,80 @@ function combine$1(
 
   var interpolators = separate(toShape, fromShapes, { maxSegmentLength: maxSegmentLength, string: string, single: single });
   return single ? function (t) { return interpolators(1 - t); } : interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
+}
+
+function all(
+  fromShapes,
+  toShapes,
+  ref
+) {
+  if ( ref === void 0 ) ref = {};
+  var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
+  var string = ref.string; if ( string === void 0 ) string = true;
+  var single = ref.single; if ( single === void 0 ) single = false;
+
+  if (
+    !Array.isArray(fromShapes) ||
+    !Array.isArray(toShapes) ||
+    fromShapes.length !== toShapes.length ||
+    !fromShapes.length
+  ) {
+    throw new TypeError(INVALID_INPUT_ALL);
+  }
+
+  var normalize = function (s) { return normalizeRing(s, maxSegmentLength); },
+    fromRings = fromShapes.map(normalize),
+    toRings = toShapes.map(normalize),
+    t0,
+    t1;
+
+  if (single) {
+    if (fromShapes.every(function (s) { return typeof s === "string"; })) {
+      t0 = fromShapes.join(" ");
+    }
+    if (toShapes.every(function (s) { return typeof s === "string"; })) {
+      t1 = toShapes.join(" ");
+    }
+  } else {
+    t0 = fromShapes.slice(0);
+    t1 = toShapes.slice(0);
+  }
+
+  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1 });
+}
+
+function interpolateSets(fromRings, toRings, ref) {
+  if ( ref === void 0 ) ref = {};
+  var string = ref.string;
+  var single = ref.single;
+  var t0 = ref.t0;
+  var t1 = ref.t1;
+
+  var order = pieceOrder(fromRings, toRings),
+    interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
+
+  if (single) {
+    var multiInterpolator = string
+      ? function (t) { return interpolators.map(function (fn) { return fn(t); }).join(" "); }
+      : function (t) { return interpolators.map(function (fn) { return fn(t); }); };
+
+    if (string && (t0 || t1)) {
+      return function (t) { return (t < 1e-4 && t0) || (1 - t < 1e-4 && t1) || multiInterpolator(t); };
+    }
+    return multiInterpolator;
+  } else if (string) {
+    t0 = Array.isArray(t0) ? t0.map(function (d) { return typeof d === "string" && d; }) : [];
+    t1 = Array.isArray(t1) ? t1.map(function (d) { return typeof d === "string" && d; }) : [];
+
+    return interpolators.map(function (fn, i) {
+      if (t0[i] || t1[i]) {
+        return function (t) { return (t < 1e-4 && t0[i]) || (1 - t < 1e-4 && t1[i]) || fn(t); };
+      }
+      return fn;
+    });
+  }
+
+  return interpolators;
 }
 
 function fromCircle(x, y, radius, toShape, options) {
@@ -4094,6 +4152,7 @@ function rectPath(x, y, width, height) {
 exports.interpolate = interpolate;
 exports.separate = separate;
 exports.combine = combine$1;
+exports.all = all;
 exports.splitPathString = splitPathString;
 exports.toPathString = toPathString;
 exports.fromCircle = fromCircle;
