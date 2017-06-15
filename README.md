@@ -177,6 +177,10 @@ d3.select("path")
 
 Like `separate()` but reversed.
 
+### flubber.all(fromShapeList, toShapeList[, options])
+
+Like `separate` or `combine` but instead expects two arrays of shapes the same length (e.g. an array of three triangles turning into an array of three squares). The options are the same with one additional option, `match` (default: `true`).  By default, the shapes will be matched up based on distance, but if `match` is set to false, they will be paired up based on the orders of the original arrays (the first `fromShapeList` item will turn into the first `toShapeList` item, and so on).
+
 #### flubber.toPathString(ring)
 
 A helper function for converting an array of points to an SVG path string.

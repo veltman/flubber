@@ -3972,6 +3972,7 @@ function all(
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
   var single = ref.single; if ( single === void 0 ) single = false;
+  var match = ref.match; if ( match === void 0 ) match = true;
 
   if (
     !Array.isArray(fromShapes) ||
@@ -4000,7 +4001,7 @@ function all(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1 });
+  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1, match: match });
 }
 
 function interpolateSets(fromRings, toRings, ref) {
@@ -4009,9 +4010,14 @@ function interpolateSets(fromRings, toRings, ref) {
   var single = ref.single;
   var t0 = ref.t0;
   var t1 = ref.t1;
+  var match = ref.match; if ( match === void 0 ) match = true;
 
-  var order = pieceOrder(fromRings, toRings),
+  var order = match ? pieceOrder(fromRings, toRings) : d3.range(fromRings.length),
     interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
+
+  if (match && Array.isArray(t0)) {
+    t0 = order.map(function (d) { return t0[d]; });
+  }
 
   if (single) {
     var multiInterpolator = string

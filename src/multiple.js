@@ -43,7 +43,7 @@ export function combine(
 export function all(
   fromShapes,
   toShapes,
-  { maxSegmentLength = 10, string = true, single = false } = {}
+  { maxSegmentLength = 10, string = true, single = false, match = true } = {}
 ) {
   if (
     !Array.isArray(fromShapes) ||
@@ -72,12 +72,16 @@ export function all(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string, single, t0, t1 });
+  return interpolateSets(fromRings, toRings, { string, single, t0, t1, match });
 }
 
-function interpolateSets(fromRings, toRings, { string, single, t0, t1 } = {}) {
-  let order = pieceOrder(fromRings, toRings),
+function interpolateSets(fromRings, toRings, { string, single, t0, t1, match = true } = {}) {
+  let order = match ? pieceOrder(fromRings, toRings) : d3.range(fromRings.length),
     interpolators = order.map((d, i) => interpolateRing(fromRings[d], toRings[i], string));
+
+  if (match && Array.isArray(t0)) {
+    t0 = order.map(d => t0[d]);
+  }
 
   if (single) {
     let multiInterpolator = string
