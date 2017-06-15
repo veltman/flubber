@@ -3963,7 +3963,7 @@ function combine$1(
   return single ? function (t) { return interpolators(1 - t); } : interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
 }
 
-function all(
+function interpolateAll(
   fromShapes,
   toShapes,
   ref
@@ -4167,7 +4167,7 @@ function rectPath(x, y, width, height) {
 exports.interpolate = interpolate;
 exports.separate = separate;
 exports.combine = combine$1;
-exports.all = all;
+exports.interpolateAll = interpolateAll;
 exports.splitPathString = splitPathString;
 exports.toPathString = toPathString;
 exports.fromCircle = fromCircle;

@@ -40,7 +40,7 @@ export function combine(
   return single ? t => interpolators(1 - t) : interpolators.map(fn => t => fn(1 - t));
 }
 
-export function all(
+export function interpolateAll(
   fromShapes,
   toShapes,
   { maxSegmentLength = 10, string = true, single = false, match = true } = {}

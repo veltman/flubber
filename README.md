@@ -177,7 +177,7 @@ d3.select("path")
 
 Like `separate()` but reversed.
 
-### flubber.all(fromShapeList, toShapeList[, options])
+### flubber.interpolateAll(fromShapeList, toShapeList[, options])
 
 Like `separate` or `combine` but instead expects two arrays of shapes the same length (e.g. an array of three triangles turning into an array of three squares). The options are the same with one additional option, `match` (default: `true`).  By default, the shapes will be matched up based on distance, but if `match` is set to false, they will be paired up based on the orders of the original arrays (the first `fromShapeList` item will turn into the first `toShapeList` item, and so on).
 
@@ -214,6 +214,8 @@ flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
 [Morphing between one shape and multiple shapes](https://veltman.github.io/flubber/demos/multiple.html) (one element)
 
 [Morphing between one shape and multiple shapes](https://veltman.github.io/flubber/demos/multiple-distinct.html) (multiple elements)
+
+[Morphing between two sets of multiple shapes](https://veltman.github.io/flubber/demos/all.html)
 
 [Vanilla JS + Canvas](https://veltman.github.io/flubber/demos/vanilla-canvas.html)
 
