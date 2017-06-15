@@ -3991,10 +3991,10 @@ function all(
 
   if (single) {
     if (fromShapes.every(function (s) { return typeof s === "string"; })) {
-      t0 = fromShapes.join(" ");
+      t0 = fromShapes.slice(0);
     }
     if (toShapes.every(function (s) { return typeof s === "string"; })) {
-      t1 = toShapes.join(" ");
+      t1 = toShapes.slice(0);
     }
   } else {
     t0 = fromShapes.slice(0);
@@ -4012,11 +4012,20 @@ function interpolateSets(fromRings, toRings, ref) {
   var t1 = ref.t1;
   var match = ref.match; if ( match === void 0 ) match = true;
 
-  var order = match ? pieceOrder(fromRings, toRings) : d3.range(fromRings.length),
+  var order = match ? pieceOrder(fromRings, toRings) : fromRings.map(function (d, i) { return i; }),
     interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
 
   if (match && Array.isArray(t0)) {
     t0 = order.map(function (d) { return t0[d]; });
+  }
+
+  if (single && string) {
+    if (Array.isArray(t0)) {
+      t0 = t0.join(" ");
+    }
+    if (Array.isArray(t1)) {
+      t1 = t1.join(" ");
+    }
   }
 
   if (single) {

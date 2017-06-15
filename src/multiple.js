@@ -62,10 +62,10 @@ export function all(
 
   if (single) {
     if (fromShapes.every(s => typeof s === "string")) {
-      t0 = fromShapes.join(" ");
+      t0 = fromShapes.slice(0);
     }
     if (toShapes.every(s => typeof s === "string")) {
-      t1 = toShapes.join(" ");
+      t1 = toShapes.slice(0);
     }
   } else {
     t0 = fromShapes.slice(0);
@@ -81,6 +81,15 @@ function interpolateSets(fromRings, toRings, { string, single, t0, t1, match = t
 
   if (match && Array.isArray(t0)) {
     t0 = order.map(d => t0[d]);
+  }
+
+  if (single && string) {
+    if (Array.isArray(t0)) {
+      t0 = t0.join(" ");
+    }
+    if (Array.isArray(t1)) {
+      t1 = t1.join(" ");
+    }
   }
 
   if (single) {
