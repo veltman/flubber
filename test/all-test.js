@@ -1,6 +1,7 @@
 import { supertape } from "./utils.js";
 import { all } from "../src/multiple.js";
 import * as shapes from "./shapes.js";
+import { INVALID_INPUT_ALL } from "../src/errors.js";
 
 let tape = supertape();
 
@@ -162,6 +163,22 @@ tape("matching", function(test) {
 
   test.equal(interpolateSingleNoMatch(0), [leftSquare, rightSquare].join(" "));
   test.equal(interpolateSingleNoMatch(1), [rightTriangle, leftTriangle].join(" "));
+
+  test.end();
+});
+
+tape("errors", function(test) {
+  let err = new RegExp(INVALID_INPUT_ALL.slice(25, 50));
+
+  let ring = [[0, 0], [1, 1], [2, 2]];
+
+  test.throws(() => all(1), err);
+  test.throws(() => all([square, square], [square]), err);
+  test.throws(() => all([], []), err);
+  test.throws(() => all([square, square], [square, square, square]), err);
+
+  test.doesNotThrow(() => all([square, square], [square, square]), err);
+  test.doesNotThrow(() => all([square, ring, square], [ring, square, ring]), err);
 
   test.end();
 });
