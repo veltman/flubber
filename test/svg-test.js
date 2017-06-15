@@ -108,37 +108,6 @@ tape("pathStringToRing preserve", function(test) {
   test.end();
 });
 
-tape("separate/combine single preserve string at t=0, t=1", function(test) {
-  let separator = separate(square, [halfcircle, bezier], { single: true }),
-    combiner = combine([halfcircle, bezier], square, { single: true });
-
-  test.equal(separator(0), square);
-  test.equal(separator(1), [halfcircle, bezier].join(" "));
-  test.equal(separator(0), combiner(1));
-  test.equal(separator(1), combiner(0));
-
-  test.end();
-});
-
-tape("separate/combine preserve string at t=1", function(test) {
-  let separator = separate(square, [halfcircle, bezier]),
-    combiner = combine([halfcircle, bezier], square);
-
-  test.equal(separator[0](1), halfcircle);
-  test.equal(separator[1](1), bezier);
-  test.equal(separator[0](1), combiner[0](0));
-  test.equal(separator[1](1), combiner[1](0));
-  test.equal(separator.length, combiner.length);
-  test.assert(
-    separator.every(function(fn) {
-      let val = fn(0.5);
-      return typeof val === "string";
-    })
-  );
-
-  test.end();
-});
-
 tape("pathStringToRing produces at least 3 points", function(test) {
   let infinite = pathStringToRing(halfcircle, Infinity).ring,
     tooBig = pathStringToRing(halfcircle, 100000).ring;
