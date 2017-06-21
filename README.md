@@ -177,7 +177,7 @@ d3.select("path")
 
 Like `separate()` but reversed.
 
-### flubber.interpolateAll(fromShapeList, toShapeList[, options])
+#### flubber.interpolateAll(fromShapeList, toShapeList[, options])
 
 Like `separate()` or `combine()` but instead expects two arrays of shapes the same length (e.g. an array of three triangles turning into an array of three squares). The shapes will be matched up in the order of the arrays (the first `fromShapeList` item will turn into the first `toShapeList` item, and so on).
 
