@@ -22,13 +22,11 @@ export function separate(
     t0 = typeof fromShape === "string" && fromShape,
     t1;
 
-  if (single && toShapes.every(s => typeof s === "string")) {
-    t1 = toShapes.join(" ");
-  } else if (!single) {
+  if (!single || toShapes.every(s => typeof s === "string")) {
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string, single, t0, t1 });
+  return interpolateSets(fromRings, toRings, { match: true, string, single, t0, t1 });
 }
 
 export function combine(
@@ -43,7 +41,7 @@ export function combine(
 export function interpolateAll(
   fromShapes,
   toShapes,
-  { maxSegmentLength = 10, string = true, single = false, match = true } = {}
+  { maxSegmentLength = 10, string = true, single = false } = {}
 ) {
   if (
     !Array.isArray(fromShapes) ||
@@ -72,10 +70,10 @@ export function interpolateAll(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string, single, t0, t1, match });
+  return interpolateSets(fromRings, toRings, { string, single, t0, t1, match: false });
 }
 
-function interpolateSets(fromRings, toRings, { string, single, t0, t1, match = true } = {}) {
+function interpolateSets(fromRings, toRings, { string, single, t0, t1, match } = {}) {
   let order = match ? pieceOrder(fromRings, toRings) : fromRings.map((d, i) => i),
     interpolators = order.map((d, i) => interpolateRing(fromRings[d], toRings[i], string));
 

@@ -3940,13 +3940,11 @@ function separate(
     t0 = typeof fromShape === "string" && fromShape,
     t1;
 
-  if (single && toShapes.every(function (s) { return typeof s === "string"; })) {
-    t1 = toShapes.join(" ");
-  } else if (!single) {
+  if (!single || toShapes.every(function (s) { return typeof s === "string"; })) {
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1 });
+  return interpolateSets(fromRings, toRings, { match: true, string: string, single: single, t0: t0, t1: t1 });
 }
 
 function combine$1(
@@ -3972,7 +3970,6 @@ function interpolateAll(
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
   var single = ref.single; if ( single === void 0 ) single = false;
-  var match = ref.match; if ( match === void 0 ) match = true;
 
   if (
     !Array.isArray(fromShapes) ||
@@ -4001,7 +3998,7 @@ function interpolateAll(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1, match: match });
+  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1, match: false });
 }
 
 function interpolateSets(fromRings, toRings, ref) {
@@ -4010,7 +4007,7 @@ function interpolateSets(fromRings, toRings, ref) {
   var single = ref.single;
   var t0 = ref.t0;
   var t1 = ref.t1;
-  var match = ref.match; if ( match === void 0 ) match = true;
+  var match = ref.match;
 
   var order = match ? pieceOrder(fromRings, toRings) : fromRings.map(function (d, i) { return i; }),
     interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });

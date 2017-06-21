@@ -132,43 +132,16 @@ tape("all with string inputs single", function(test) {
   test.end();
 });
 
-tape("matching", function(test) {
-  let leftSquare = square,
-    rightSquare = "M500,0L600,0L600,100L500,100Z",
-    leftTriangle = "M0,0L100,0L0,100Z",
-    rightTriangle = "M500,0L600,0L500,100Z";
-
-  let interpolate = interpolateAll([leftSquare, rightSquare], [rightTriangle, leftTriangle]),
-    interpolateNoMatch = interpolateAll([leftSquare, rightSquare], [rightTriangle, leftTriangle], {
-      match: false
-    }),
-    interpolateSingle = interpolateAll([leftSquare, rightSquare], [rightTriangle, leftTriangle], {
+tape("mix-and-match", function(test) {
+  let interpolate = interpolateAll([halfcircle, shapes.square1()], [shapes.square2(), bezier]),
+    interpolateSingle = interpolateAll([halfcircle, shapes.square1()], [shapes.square2(), bezier], {
       single: true
-    }),
-    interpolateSingleNoMatch = interpolateAll(
-      [leftSquare, rightSquare],
-      [rightTriangle, leftTriangle],
-      {
-        single: true,
-        match: false
-      }
-    );
+    });
 
-  test.equal(interpolate[0](0), rightSquare);
-  test.equal(interpolate[1](0), leftSquare);
-  test.equal(interpolate[0](1), rightTriangle);
-  test.equal(interpolate[1](1), leftTriangle);
-
-  test.equal(interpolateNoMatch[0](0), leftSquare);
-  test.equal(interpolateNoMatch[1](0), rightSquare);
-  test.equal(interpolateNoMatch[0](1), rightTriangle);
-  test.equal(interpolateNoMatch[1](1), leftTriangle);
-
-  test.equal(interpolateSingle(0), [rightSquare, leftSquare].join(" "));
-  test.equal(interpolateSingle(1), [rightTriangle, leftTriangle].join(" "));
-
-  test.equal(interpolateSingleNoMatch(0), [leftSquare, rightSquare].join(" "));
-  test.equal(interpolateSingleNoMatch(1), [rightTriangle, leftTriangle].join(" "));
+  test.equal(interpolate[0](0), halfcircle);
+  test.notDeepEqual(interpolate[1](0), shapes.square1());
+  test.notDeepEqual(interpolate[0](1), shapes.square2());
+  test.equal(interpolate[1](1), bezier);
 
   test.end();
 });

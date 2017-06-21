@@ -63,10 +63,12 @@ function randomPolygon() {
 
   return new Array(sides)
     .fill(null)
-    .map((d, i) => [
-      Math.cos(offset + 2 * Math.PI * i / sides) * r + x,
-      Math.sin(offset + 2 * Math.PI * i / sides) * r + height / 2
-    ]);
+    .map(function(d, i) {
+      return [
+        Math.cos(offset + 2 * Math.PI * i / sides) * r + x,
+        Math.sin(offset + 2 * Math.PI * i / sides) * r + height / 2
+      ]
+    });
 }
 
 // Cubic in/out easing

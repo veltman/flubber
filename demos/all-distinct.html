@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    path {
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../build/flubber.min.js"></script>
+<script>
+var svg = d3.select("svg"),
+    width = 960,
+    height = 500,
+    currentShapes = randomPolygons(3),
+    colors = ["red", "yellow", "blue"];
+
+var paths = svg
+  .selectAll("path")
+  .data(currentShapes)
+  .enter()
+  .append("path")
+  .style("fill", function(d, i) {
+    return colors[i];
+  });
+
+animate();
+
+function animate() {
+  var nextShapes = randomPolygons(currentShapes.length),
+      interpolators = flubber.interpolateAll(currentShapes, nextShapes, { match: false });
+
+  currentShapes = nextShapes;
+
+  paths
+    .data(interpolators)
+    .transition()
+    .delay(250)
+    .duration(1000)
+    .attrTween("d", function(d) {
+      return d;
+    })
+    .filter(function(d, i) {
+      return !i;
+    })
+    .on("end", animate);
+}
+
+function randomPolygons(numShapes) {
+  return d3.range(numShapes).map(randomPolygon);
+}
+
+function randomPolygon() {
+  var sides = 3 + Math.floor(Math.random() * 10),
+      r = 50 + Math.random() * 100,
+      x = r + Math.random() * (width - r * 2),
+      y = r + Math.random() * (height - r * 2);
+
+  return d3.range(sides).map(function(i) {
+    return [
+      Math.cos(Math.PI / 2 + 2 * Math.PI * i / sides) * r + x,
+      Math.sin(Math.PI / 2 + 2 * Math.PI * i / sides) * r + y
+    ];
+  });
+}
+
+</script>
