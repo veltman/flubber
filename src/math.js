@@ -26,3 +26,7 @@ export function interpolatePoint(a, b) {
     return a.map((d, i) => d + t * (b[i] - d));
   };
 }
+
+export function isFiniteNumber(number) {
+  return typeof number === "number" && isFinite(number);
+}

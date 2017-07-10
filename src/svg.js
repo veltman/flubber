@@ -1,6 +1,7 @@
 import Path from "svgpath";
 import { svgPathProperties } from "svg-path-properties";
 import normalizeRing from "./normalize.js";
+import { isFiniteNumber } from "./math.js";
 import { INVALID_INPUT } from "./errors.js";
 
 function parse(str) {
@@ -73,7 +74,7 @@ function approximateRing(parsed, maxSegmentLength) {
   m = measure(ringPath);
   len = m.getTotalLength();
 
-  if (maxSegmentLength && Number.isFinite(maxSegmentLength) && maxSegmentLength > 0) {
+  if (maxSegmentLength && isFiniteNumber(maxSegmentLength) && maxSegmentLength > 0) {
     numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
   }
 

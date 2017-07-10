@@ -1,6 +1,6 @@
 import { polygonArea } from "d3-polygon";
 import { pathStringToRing } from "./svg.js";
-import { samePoint } from "./math.js";
+import { samePoint, isFiniteNumber } from "./math.js";
 import { bisect } from "./add.js";
 import { INVALID_INPUT, TOO_FEW_POINTS } from "./errors.js";
 
@@ -41,7 +41,7 @@ export default function normalizeRing(ring, maxSegmentLength) {
   if (
     !skipBisect &&
     maxSegmentLength &&
-    Number.isFinite(maxSegmentLength) &&
+    isFiniteNumber(maxSegmentLength) &&
     maxSegmentLength > 0
   ) {
     bisect(points, maxSegmentLength);
@@ -55,8 +55,8 @@ function validRing(ring) {
     return (
       Array.isArray(point) &&
       point.length >= 2 &&
-      Number.isFinite(point[0]) &&
-      Number.isFinite(point[1])
+      isFiniteNumber(point[0]) &&
+      isFiniteNumber(point[1])
     );
   });
 }

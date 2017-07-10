@@ -2317,6 +2317,37 @@ var svgPathProperties = function(svgString) {
   return svgProperties(svgString);
 };
 
+function distance(a, b) {
+  return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]));
+}
+
+function pointAlong(a, b, pct) {
+  return [a[0] + (b[0] - a[0]) * pct, a[1] + (b[1] - a[1]) * pct];
+}
+
+function samePoint(a, b) {
+  return distance(a, b) < 1e-9;
+}
+
+function interpolatePoints(a, b, string) {
+  var interpolators = a.map(function (d, i) { return interpolatePoint(d, b[i]); });
+
+  return function(t) {
+    var values = interpolators.map(function (fn) { return fn(t); });
+    return string ? toPathString(values) : values;
+  };
+}
+
+function interpolatePoint(a, b) {
+  return function(t) {
+    return a.map(function (d, i) { return d + t * (b[i] - d); });
+  };
+}
+
+function isFiniteNumber(number) {
+  return typeof number === "number" && isFinite(number);
+}
+
 var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
 
 var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
@@ -2398,7 +2429,7 @@ function approximateRing(parsed, maxSegmentLength) {
   m = measure(ringPath);
   len = m.getTotalLength();
 
-  if (maxSegmentLength && Number.isFinite(maxSegmentLength) && maxSegmentLength > 0) {
+  if (maxSegmentLength && isFiniteNumber(maxSegmentLength) && maxSegmentLength > 0) {
     numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
   }
 
@@ -2424,33 +2455,6 @@ function measure(d) {
 
     return path;
   }
-}
-
-function distance(a, b) {
-  return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]));
-}
-
-function pointAlong(a, b, pct) {
-  return [a[0] + (b[0] - a[0]) * pct, a[1] + (b[1] - a[1]) * pct];
-}
-
-function samePoint(a, b) {
-  return distance(a, b) < 1e-9;
-}
-
-function interpolatePoints(a, b, string) {
-  var interpolators = a.map(function (d, i) { return interpolatePoint(d, b[i]); });
-
-  return function(t) {
-    var values = interpolators.map(function (fn) { return fn(t); });
-    return string ? toPathString(values) : values;
-  };
-}
-
-function interpolatePoint(a, b) {
-  return function(t) {
-    return a.map(function (d, i) { return d + t * (b[i] - d); });
-  };
 }
 
 function addPoints(ring, numPoints, maxLength) {
@@ -2531,7 +2535,7 @@ function normalizeRing(ring, maxSegmentLength) {
   if (
     !skipBisect &&
     maxSegmentLength &&
-    Number.isFinite(maxSegmentLength) &&
+    isFiniteNumber(maxSegmentLength) &&
     maxSegmentLength > 0
   ) {
     bisect(points, maxSegmentLength);
@@ -2545,8 +2549,8 @@ function validRing(ring) {
     return (
       Array.isArray(point) &&
       point.length >= 2 &&
-      Number.isFinite(point[0]) &&
-      Number.isFinite(point[1])
+      isFiniteNumber(point[0]) &&
+      isFiniteNumber(point[1])
     );
   });
 }
