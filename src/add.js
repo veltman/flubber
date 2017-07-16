@@ -1,7 +1,7 @@
 import { polygonLength } from "d3-polygon";
 import { distance, pointAlong } from "./math.js";
 
-export function addPoints(ring, numPoints, maxLength = Infinity) {
+export function addPoints(ring, numPoints) {
   const desiredLength = ring.length + numPoints,
     step = polygonLength(ring) / numPoints;
 
