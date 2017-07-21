@@ -96,3 +96,43 @@ tape("Bisect segments", function(test) {
 
   test.end();
 });
+
+tape("Zero-length handling", function(test) {
+  let original = {
+    all: [[0, 0], [0, 0], [0, 0]],
+    partial: [[0, 0], [1, 1], [1, 1], [1, 1]],
+    single: [[0, 0]]
+  };
+
+  let added = {};
+
+  for (let key in original) {
+    added[key] = original[key].slice(0);
+    addPoints(added[key], 2);
+  }
+
+  test.inDelta(added.all, [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]);
+
+  test.inDelta(added.single, [[0, 0], [0, 0], [0, 0]]);
+
+  test.inDelta(added.partial, [[0, 0], [0.5, 0.5], [1, 1], [1, 1], [1, 1], [0.5, 0.5]]);
+
+  test.end();
+});
+
+tape("Line segment", function(test) {
+  let original = [[0, 0], [100, 0]],
+    added;
+
+  added = original.slice(0);
+  addPoints(added, 1);
+
+  test.inDelta(added, [[0, 0], [100, 0], [100, 0]]);
+
+  added = original.slice(0);
+  addPoints(added, 2);
+
+  test.inDelta(added, [[0, 0], [50, 0], [100, 0], [50, 0]]);
+
+  test.end();
+});

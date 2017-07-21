@@ -59,12 +59,12 @@ tape("Expects valid ring or string", function(test) {
 
 tape("Bisect", function(test) {
 
-    // No bisecting zero-length segments
-    test.deepEqual(normalizeRing([[0, 0]], 1e-6), [[0, 0]]);
-    test.deepEqual(normalizeRing([[0, 0], [0, 0], [0, 0]], 1e-6), [[0, 0], [0, 0]]);
-    test.deepEqual(normalizeRing([[0, 0], [0, 0], [1, 0]], 0.6), [[0, 0], [0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
+  // No bisecting zero-length segments
+  test.deepEqual(normalizeRing([[0, 0]], 1e-6), [[0, 0]]);
+  test.deepEqual(normalizeRing([[0, 0], [0, 0], [0, 0]], 1e-6), [[0, 0], [0, 0]]);
+  test.deepEqual(normalizeRing([[0, 0], [0, 0], [1, 0]], 0.6), [[0, 0], [0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
 
-    test.deepEqual(normalizeRing([[0, 0], [1, 0]], 0.6), [[0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
-    test.end();
+  test.deepEqual(normalizeRing([[0, 0], [1, 0]], 0.6), [[0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
+  test.end();
 
 });
