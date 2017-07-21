@@ -2352,10 +2352,6 @@ var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or a
 
 var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
 
-
-
-var TOO_FEW_POINTS = "Polygons must have at least three points.";
-
 function parse$$1(str) {
   return new index(str).abs();
 }
@@ -2518,11 +2514,6 @@ function normalizeRing(ring, maxSegmentLength) {
   //No duplicate closing point for now
   if (points.length > 1 && samePoint(points[0], points[points.length - 1])) {
     points.pop();
-  }
-
-  // 3+ points to make a polygon
-  if (points.length < 3) {
-    throw new TypeError(TOO_FEW_POINTS);
   }
 
   area = polygonArea(points);

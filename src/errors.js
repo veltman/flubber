@@ -9,5 +9,3 @@ export const INVALID_INPUT_ALL = `flubber.all() expects two arrays of equal leng
 export const INVALID_PATH_STRING = `Invalid SVG path string supplied.
 Path string reference: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
 `;
-
-export const TOO_FEW_POINTS = `Polygons must have at least three points.`;

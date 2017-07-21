@@ -2,7 +2,7 @@ import { polygonArea } from "d3-polygon";
 import { pathStringToRing } from "./svg.js";
 import { samePoint, isFiniteNumber } from "./math.js";
 import { bisect } from "./add.js";
-import { INVALID_INPUT, TOO_FEW_POINTS } from "./errors.js";
+import { INVALID_INPUT } from "./errors.js";
 
 export default function normalizeRing(ring, maxSegmentLength) {
   let points, area, skipBisect;
@@ -24,11 +24,6 @@ export default function normalizeRing(ring, maxSegmentLength) {
   //No duplicate closing point for now
   if (points.length > 1 && samePoint(points[0], points[points.length - 1])) {
     points.pop();
-  }
-
-  // 3+ points to make a polygon
-  if (points.length < 3) {
-    throw new TypeError(TOO_FEW_POINTS);
   }
 
   area = polygonArea(points);

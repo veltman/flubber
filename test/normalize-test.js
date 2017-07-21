@@ -1,7 +1,7 @@
 import { supertape } from "./utils.js";
 import * as shapes from "./shapes.js";
 import normalizeRing from "../src/normalize.js";
-import { INVALID_INPUT, TOO_FEW_POINTS } from "../src/errors.js";
+import { INVALID_INPUT } from "../src/errors.js";
 
 let tape = supertape();
 
@@ -54,11 +54,17 @@ tape("Expects valid ring or string", function(test) {
   // Partially valid
   test.throws(() => normalizeRing([[0, 0], [1, 1], [2, 2], "x"]), err);
 
-  // Too short
-  test.throws(() => normalizeRing([[0, 0], [1, 1]]), new RegExp(TOO_FEW_POINTS));
-  test.throws(() => normalizeRing([[0, 0], [1, 1], [0, 0]]), new RegExp(TOO_FEW_POINTS));
-
-  test.doesNotThrow(() => normalizeRing([[0, 0], [1, 1], [2, 2]]));
-
   test.end();
+});
+
+tape("Bisect", function(test) {
+
+    // No bisecting zero-length segments
+    test.deepEqual(normalizeRing([[0, 0]], 1e-6), [[0, 0]]);
+    test.deepEqual(normalizeRing([[0, 0], [0, 0], [0, 0]], 1e-6), [[0, 0], [0, 0]]);
+    test.deepEqual(normalizeRing([[0, 0], [0, 0], [1, 0]], 0.6), [[0, 0], [0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
+
+    test.deepEqual(normalizeRing([[0, 0], [1, 0]], 0.6), [[0, 0], [0.5, 0], [1, 0], [0.5, 0]]);
+    test.end();
+
 });
