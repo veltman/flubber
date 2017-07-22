@@ -48,9 +48,7 @@ export function createTopology(triangles, ring) {
 
   // Sort smallest first
   // TODO sorted insertion?
-  topology.objects.triangles.geometries.sort(function(a, b) {
-    return a.area - b.area;
-  });
+  topology.objects.triangles.geometries.sort((a, b) => a.area - b.area);
 
   return topology;
 }

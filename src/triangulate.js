@@ -6,10 +6,7 @@ export default function(ring, numPieces) {
 }
 
 export function cut(ring) {
-  let vertices = ring.reduce(function(arr, point) {
-    return arr.concat(point.slice(0, 2));
-  }, []),
-    cuts = earcut(vertices),
+  let cuts = earcut(ring.reduce((arr, point) => [...arr, point[0], point[1]], [])),
     triangles = [];
 
   for (let i = 0, l = cuts.length; i < l; i += 3) {

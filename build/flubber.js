@@ -2453,9 +2453,7 @@ function measure(d) {
   }
 }
 
-function addPoints(ring, numPoints, maxLength) {
-  if ( maxLength === void 0 ) maxLength = Infinity;
-
+function addPoints(ring, numPoints) {
   var desiredLength = ring.length + numPoints,
     step = polygonLength(ring) / numPoints;
 
@@ -2547,7 +2545,6 @@ function validRing(ring) {
 }
 
 var rotate = function(ring, vs) {
-
   var len = ring.length,
       min = Infinity,
       bestOffset,
@@ -2555,7 +2552,6 @@ var rotate = function(ring, vs) {
       spliced;
 
   var loop = function ( offset ) {
-
     sumOfSquares = 0;
 
     vs.forEach(function(p, i){
@@ -2567,7 +2563,6 @@ var rotate = function(ring, vs) {
       min = sumOfSquares;
       bestOffset = offset;
     }
-
   };
 
   for (var offset = 0; offset < len; offset++) loop( offset );
@@ -2576,7 +2571,6 @@ var rotate = function(ring, vs) {
     spliced = ring.splice(0, bestOffset);
     ring.splice.apply(ring, [ ring.length, 0 ].concat( spliced ));
   }
-
 };
 
 var interpolate = function(fromShape, toShape, ref) {
@@ -3806,9 +3800,7 @@ function createTopology(triangles, ring) {
 
   // Sort smallest first
   // TODO sorted insertion?
-  topology.objects.triangles.geometries.sort(function(a, b) {
-    return a.area - b.area;
-  });
+  topology.objects.triangles.geometries.sort(function (a, b) { return a.area - b.area; });
 
   return topology;
 }
@@ -3855,10 +3847,7 @@ var triangulate = function(ring, numPieces) {
 };
 
 function cut(ring) {
-  var vertices = ring.reduce(function(arr, point) {
-    return arr.concat(point.slice(0, 2));
-  }, []),
-    cuts = earcut_1(vertices),
+  var cuts = earcut_1(ring.reduce(function (arr, point) { return arr.concat( [point[0]], [point[1]]); }, [])),
     triangles = [];
 
   for (var i = 0, l = cuts.length; i < l; i += 3) {
@@ -3869,11 +3858,12 @@ function cut(ring) {
   return triangles;
 }
 
+// With 8 or fewer shapes, find the best permutation
+// Skip if array is huge (9+ shapes)
 var pieceOrder = function(start, end) {
   var distances = start.map(function (p1) { return end.map(function (p2) { return squaredDistance(p1, p2); }); }),
     order = bestOrder(start, end, distances);
 
-  // Don't permute huge array
   if (start.length > 8) {
     return start.map(function (d, i) { return i; });
   }

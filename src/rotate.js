@@ -1,7 +1,6 @@
 import { distance } from "./math.js";
 
 export default function(ring, vs) {
-
   let len = ring.length,
       min = Infinity,
       bestOffset,
@@ -9,7 +8,6 @@ export default function(ring, vs) {
       spliced;
 
   for (let offset = 0; offset < len; offset++) {
-
     sumOfSquares = 0;
 
     vs.forEach(function(p, i){
@@ -21,12 +19,10 @@ export default function(ring, vs) {
       min = sumOfSquares;
       bestOffset = offset;
     }
-
   }
 
   if (bestOffset) {
     spliced = ring.splice(0, bestOffset);
     ring.splice(ring.length, 0, ...spliced);
   }
-
 }
