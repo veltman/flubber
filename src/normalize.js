@@ -21,7 +21,8 @@ export default function normalizeRing(ring, maxSegmentLength) {
     throw new TypeError(INVALID_INPUT);
   }
 
-  //No duplicate closing point for now
+  // TODO skip this test to avoid scale issues?
+  // Chosen epsilon (1e-6) is problematic for small coordinate range
   if (points.length > 1 && samePoint(points[0], points[points.length - 1])) {
     points.pop();
   }
