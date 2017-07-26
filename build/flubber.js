@@ -20,7 +20,7 @@ var polygonArea = function(polygon) {
   return area / 2;
 };
 
-var polygonCentroid = function(polygon) {
+var d3Centroid = function(polygon) {
   var i = -1,
       n = polygon.length,
       x = 0,
@@ -2348,6 +2348,17 @@ function isFiniteNumber(number) {
   return typeof number === "number" && isFinite(number);
 }
 
+// Use plain mean if polygon is invalid
+function polygonCentroid$$1(polygon) {
+  if (polygon.length > 2) {
+    return d3Centroid(polygon);
+  }
+  return [
+    (polygon[0][0] + polygon[polygon.length - 1][0]) / 2,
+    (polygon[0][1] + polygon[polygon.length - 1][1]) / 2
+  ];
+}
+
 var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
 
 var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
@@ -2509,7 +2520,8 @@ function normalizeRing(ring, maxSegmentLength) {
     throw new TypeError(INVALID_INPUT);
   }
 
-  //No duplicate closing point for now
+  // TODO skip this test to avoid scale issues?
+  // Chosen epsilon (1e-6) is problematic for small coordinate range
   if (points.length > 1 && samePoint(points[0], points[points.length - 1])) {
     points.pop();
   }
@@ -3900,7 +3912,7 @@ function bestOrder(start, end, distances) {
 }
 
 function squaredDistance(p1, p2) {
-  var d = distance(polygonCentroid(p1), polygonCentroid(p2));
+  var d = distance(polygonCentroid$$1(p1), polygonCentroid$$1(p2));
   return d * d;
 }
 
@@ -4075,7 +4087,7 @@ function fromShape(fromFn, toShape, original, ref) {
 
 function circlePoints(x, y, radius) {
   return function(ring) {
-    var centroid = polygonCentroid(ring),
+    var centroid = polygonCentroid$$1(ring),
       perimeter = polygonLength(ring.concat( [ring[0]])),
       startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
       along = 0;
@@ -4085,7 +4097,7 @@ function circlePoints(x, y, radius) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      angle = startingAngle + 2 * Math.PI * along / perimeter;
+      angle = startingAngle + 2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
       return [Math.cos(angle) * radius + x, Math.sin(angle) * radius + y];
     });
   };
@@ -4094,7 +4106,7 @@ function circlePoints(x, y, radius) {
 // TODO splice in exact corners?
 function rectPoints(x, y, width, height) {
   return function(ring) {
-    var centroid = polygonCentroid(ring),
+    var centroid = polygonCentroid$$1(ring),
       perimeter = polygonLength(ring.concat( [ring[0]])),
       startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
       along = 0;
@@ -4106,10 +4118,10 @@ function rectPoints(x, y, width, height) {
     var startingProgress = startingAngle / (2 * Math.PI);
 
     return ring.map(function (point, i) {
-      var relative = rectPoint((startingProgress + along / perimeter) % 1);
       if (i) {
         along += distance(point, ring[i - 1]);
       }
+      var relative = rectPoint((startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1);
       return [x + relative[0] * width, y + relative[1] * height];
     });
   };

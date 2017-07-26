@@ -1,5 +1,5 @@
-import { polygonCentroid, polygonLength } from "d3-polygon";
-import { interpolatePoints, distance } from "./math.js";
+import { polygonLength } from "d3-polygon";
+import { polygonCentroid, interpolatePoints, distance } from "./math.js";
 import normalizeRing from "./normalize.js";
 import { toPathString } from "./svg.js";
 
@@ -50,7 +50,7 @@ export function circlePoints(x, y, radius) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      angle = startingAngle + 2 * Math.PI * along / perimeter;
+      angle = startingAngle + 2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
       return [Math.cos(angle) * radius + x, Math.sin(angle) * radius + y];
     });
   };
@@ -71,10 +71,10 @@ export function rectPoints(x, y, width, height) {
     let startingProgress = startingAngle / (2 * Math.PI);
 
     return ring.map((point, i) => {
-      let relative = rectPoint((startingProgress + along / perimeter) % 1);
       if (i) {
         along += distance(point, ring[i - 1]);
       }
+      let relative = rectPoint((startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1);
       return [x + relative[0] * width, y + relative[1] * height];
     });
   };

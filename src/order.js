@@ -1,5 +1,4 @@
-import { distance } from "./math.js";
-import { polygonCentroid } from "d3-polygon";
+import { polygonCentroid, distance } from "./math.js";
 
 // With 8 or fewer shapes, find the best permutation
 // Skip if array is huge (9+ shapes)
