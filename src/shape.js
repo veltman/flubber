@@ -1,10 +1,16 @@
 import { polygonLength } from "d3-polygon";
-import { polygonCentroid, interpolatePoints, distance } from "./math.js";
+import { polygonCentroid, interpolatePoints, distance, isFiniteNumber } from "./math.js";
 import normalizeRing from "./normalize.js";
 import { toPathString } from "./svg.js";
 
 export function fromCircle(x, y, radius, toShape, options) {
-  return fromShape(circlePoints(x, y, radius), toShape, circlePath(x, y, radius), options);
+  return fromShape(
+    circlePoints(x, y, radius),
+    toShape,
+    circlePath(x, y, radius),
+    2 * Math.PI * radius,
+    options
+  );
 }
 
 export function toCircle(fromShape, x, y, radius, options) {
@@ -17,6 +23,7 @@ export function fromRect(x, y, width, height, toShape, options) {
     rectPoints(x, y, width, height),
     toShape,
     rectPath(x, y, width, height),
+    2 * width + 2 * height,
     options
   );
 }
@@ -26,10 +33,18 @@ export function toRect(fromShape, x, y, width, height, options) {
   return t => interpolator(1 - t);
 }
 
-function fromShape(fromFn, toShape, original, { maxSegmentLength = 10, string = true } = {}) {
-  let toRing = normalizeRing(toShape, maxSegmentLength),
-    fromRing = fromFn(toRing),
-    interpolator = interpolatePoints(fromRing, toRing, string);
+function fromShape(fromFn, toShape, original, perimeter, { maxSegmentLength = 10, string = true } = {}) {
+  let toRing = normalizeRing(toShape, maxSegmentLength);
+      fromRing,
+      interpolator;
+
+  // Enforce maxSegmentLength on circle/rect perimeter too
+  if (isFiniteNumber(perimeter) && toRing.length < perimeter / maxSegmentLength) {
+    addPoints(toRing, Math.ceil(perimeter / maxSegmentLength - toRing.length));
+  }
+
+  fromRing = fromFn(toRing);
+  interpolator = interpolatePoints(fromRing, toRing, string);
 
   if (string) {
     return t => (t < 1e-4 ? original : interpolator(t));
@@ -74,7 +89,9 @@ export function rectPoints(x, y, width, height) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      let relative = rectPoint((startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1);
+      let relative = rectPoint(
+        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1
+      );
       return [x + relative[0] * width, y + relative[1] * height];
     });
   };

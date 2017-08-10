@@ -2464,7 +2464,7 @@ function measure(d) {
   }
 }
 
-function addPoints(ring, numPoints) {
+function addPoints$1(ring, numPoints) {
   var desiredLength = ring.length + numPoints,
     step = polygonLength(ring) / numPoints;
 
@@ -2616,8 +2616,8 @@ function interpolateRing(fromRing, toRing, string) {
   diff = fromRing.length - toRing.length;
 
   // TODO bisect and add points in one step?
-  addPoints(fromRing, diff < 0 ? diff * -1 : 0);
-  addPoints(toRing, diff > 0 ? diff : 0);
+  addPoints$1(fromRing, diff < 0 ? diff * -1 : 0);
+  addPoints$1(toRing, diff > 0 ? diff : 0);
 
   rotate(fromRing, toRing);
 
@@ -3929,7 +3929,7 @@ function separate(
   var fromRing = normalizeRing(fromShape, maxSegmentLength);
 
   if (fromRing.length < toShapes.length + 2) {
-    addPoints(fromRing, toShapes.length + 2 - fromRing.length);
+    addPoints$1(fromRing, toShapes.length + 2 - fromRing.length);
   }
 
   var fromRings = triangulate(fromRing, toShapes.length),
@@ -4047,7 +4047,13 @@ function interpolateSets(fromRings, toRings, ref) {
 }
 
 function fromCircle(x, y, radius, toShape, options) {
-  return fromShape(circlePoints(x, y, radius), toShape, circlePath(x, y, radius), options);
+  return fromShape(
+    circlePoints(x, y, radius),
+    toShape,
+    circlePath(x, y, radius),
+    2 * Math.PI * radius,
+    options
+  );
 }
 
 function toCircle(fromShape, x, y, radius, options) {
@@ -4060,6 +4066,7 @@ function fromRect(x, y, width, height, toShape, options) {
     rectPoints(x, y, width, height),
     toShape,
     rectPath(x, y, width, height),
+    2 * width + 2 * height,
     options
   );
 }
@@ -4069,14 +4076,22 @@ function toRect(fromShape, x, y, width, height, options) {
   return function (t) { return interpolator(1 - t); };
 }
 
-function fromShape(fromFn, toShape, original, ref) {
+function fromShape(fromFn, toShape, original, perimeter, ref) {
   if ( ref === void 0 ) ref = {};
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
 
-  var toRing = normalizeRing(toShape, maxSegmentLength),
-    fromRing = fromFn(toRing),
-    interpolator = interpolatePoints(fromRing, toRing, string);
+  var toRing = normalizeRing(toShape, maxSegmentLength);
+      fromRing,
+      interpolator;
+
+  // Enforce maxSegmentLength on circle/rect perimeter too
+  if (isFiniteNumber(perimeter) && toRing.length < perimeter / maxSegmentLength) {
+    addPoints(toRing, Math.ceil(perimeter / maxSegmentLength - toRing.length));
+  }
+
+  fromRing = fromFn(toRing);
+  interpolator = interpolatePoints(fromRing, toRing, string);
 
   if (string) {
     return function (t) { return (t < 1e-4 ? original : interpolator(t)); };
@@ -4121,7 +4136,9 @@ function rectPoints(x, y, width, height) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      var relative = rectPoint((startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1);
+      var relative = rectPoint(
+        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1
+      );
       return [x + relative[0] * width, y + relative[1] * height];
     });
   };
