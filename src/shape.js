@@ -1,6 +1,7 @@
 import { polygonLength } from "d3-polygon";
 import { polygonCentroid, interpolatePoints, distance, isFiniteNumber } from "./math.js";
 import normalizeRing from "./normalize.js";
+import { addPoints } from "./add.js";
 import { toPathString } from "./svg.js";
 
 export function fromCircle(x, y, radius, toShape, options) {
@@ -34,7 +35,7 @@ export function toRect(fromShape, x, y, width, height, options) {
 }
 
 function fromShape(fromFn, toShape, original, perimeter, { maxSegmentLength = 10, string = true } = {}) {
-  let toRing = normalizeRing(toShape, maxSegmentLength);
+  let toRing = normalizeRing(toShape, maxSegmentLength),
       fromRing,
       interpolator;
 

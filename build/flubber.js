@@ -2348,15 +2348,30 @@ function isFiniteNumber(number) {
   return typeof number === "number" && isFinite(number);
 }
 
-// Use plain mean if polygon is invalid
+// Use plain mean if it's a degenerate polygon (colinear points or single point)
 function polygonCentroid$$1(polygon) {
-  if (polygon.length > 2) {
-    return d3Centroid(polygon);
-  }
-  return [
+  return nonZeroArea(polygon) ? d3Centroid(polygon) : [
     (polygon[0][0] + polygon[polygon.length - 1][0]) / 2,
     (polygon[0][1] + polygon[polygon.length - 1][1]) / 2
   ];
+}
+
+function nonZeroArea(polygon) {
+
+  for (var i = 0; i < polygon.length - 2; i++) {
+
+    var a = polygon[i],
+        b = polygon[i + 1],
+        c = polygon[i + 2];
+
+    if (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])) {
+      return true;
+    }
+
+  }
+
+  return false;
+
 }
 
 var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
@@ -2464,7 +2479,7 @@ function measure(d) {
   }
 }
 
-function addPoints$1(ring, numPoints) {
+function addPoints(ring, numPoints) {
   var desiredLength = ring.length + numPoints,
     step = polygonLength(ring) / numPoints;
 
@@ -2616,8 +2631,8 @@ function interpolateRing(fromRing, toRing, string) {
   diff = fromRing.length - toRing.length;
 
   // TODO bisect and add points in one step?
-  addPoints$1(fromRing, diff < 0 ? diff * -1 : 0);
-  addPoints$1(toRing, diff > 0 ? diff : 0);
+  addPoints(fromRing, diff < 0 ? diff * -1 : 0);
+  addPoints(toRing, diff > 0 ? diff : 0);
 
   rotate(fromRing, toRing);
 
@@ -3929,7 +3944,7 @@ function separate(
   var fromRing = normalizeRing(fromShape, maxSegmentLength);
 
   if (fromRing.length < toShapes.length + 2) {
-    addPoints$1(fromRing, toShapes.length + 2 - fromRing.length);
+    addPoints(fromRing, toShapes.length + 2 - fromRing.length);
   }
 
   var fromRings = triangulate(fromRing, toShapes.length),
@@ -4081,7 +4096,7 @@ function fromShape(fromFn, toShape, original, perimeter, ref) {
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
 
-  var toRing = normalizeRing(toShape, maxSegmentLength);
+  var toRing = normalizeRing(toShape, maxSegmentLength),
       fromRing,
       interpolator;
 
