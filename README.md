@@ -203,6 +203,16 @@ flubber.splitPathString("M1,1 L2,1 L1.5,2Z M3,3 L4,3 L3.5,4 Z");
 // Returns ["M1,1 L2,1 L1.5,2Z", "M3,3 L4,3 L3.5,4 Z"]
 ```
 
+#### flubber.transformPathString(pathString,transformString)
+
+A helper function for transforming an SVG path string with an SVG transformation string, i.e. translate, rotate, scale, matrix.
+reference demo https://veltman.github.io/flubber/demos/H-House.svg
+
+```js
+flubber.transformPathString("M1,1 L2,1 L1.5,2Z","scale(2)");
+// Returns ["M2,2 L4,2 L3,4Z"]
+```
+
 ### Examples
 
 *Note: most of these demos use D3 to keep the code concise, but this can be used with any library, or with no library at all.*
