@@ -3,9 +3,7 @@ import { polygonCentroid, distance } from "./math.js";
 // With 8 or fewer shapes, find the best permutation
 // Skip if array is huge (9+ shapes)
 export default function(start, end) {
-  let distances = start.map(p1 => end.map(p2 => squaredDistance(p1, p2))),
-    order = bestOrder(start, end, distances);
-
+  let distances = start.map(p1 => end.map(p2 => squaredDistance(p1, p2)));
   if (start.length > 8) {
     return start.map((d, i) => i);
   }
