@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/veltman/flubber.svg?branch=master)](https://travis-ci.org/veltman/flubber)
+[![CDNJS](https://img.shields.io/cdnjs/v/flubber.svg)](https://cdnjs.com/libraries/flubber)
 
 # flubber
 
