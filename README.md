@@ -48,7 +48,7 @@ Using D3, usage could look something like:
 
 ```js
 var triangle = [[1, 1], [2, 1], [1.5, 2]],
-    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+    pentagon = [[1.5, 1], [2, 1.3], [1.8, 2], [1.2, 2], [1, 1.3]];
 
 var interpolator = flubber.interpolate(triangle, pentagon);
 
@@ -61,7 +61,7 @@ Without D3, usage might look something like this:
 ```js
 // Mixing and matching input types is OK
 var triangle = "M1,1 L2,1 L1.5,2 Z",
-    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+    pentagon = [[1.5, 1], [2, 1.3], [1.8, 2], [1.2, 2], [1, 1.3]];
 
 var interpolator = flubber.interpolate(triangle, pentagon);
 
