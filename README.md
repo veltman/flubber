@@ -47,8 +47,8 @@ Flubber methods return **interpolators**, functions that you can call later with
 Using D3, usage could look something like:
 
 ```js
-var triangle = [[1, 1], [2, 1], [1.5, 2]],
-    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+var triangle = [[1, 0], [2, 2], [0, 2]],
+    pentagon = [[0, 0], [2, 0], [2, 1], [1, 2], [0, 1]];
 
 var interpolator = flubber.interpolate(triangle, pentagon);
 
@@ -60,8 +60,8 @@ d3.select("path")
 Without D3, usage might look something like this:
 ```js
 // Mixing and matching input types is OK
-var triangle = "M1,1 L2,1 L1.5,2 Z",
-    pentagon = [[0, 0], [1, 1], [3, 1], [2, 0.5], [0, 1]];
+var triangle = "M1,0 L2,2 L0,2 Z",
+    pentagon = [[0, 0], [2, 0], [2, 1], [1, 2], [0, 1]];
 
 var interpolator = flubber.interpolate(triangle, pentagon);
 
