@@ -1,6 +1,6 @@
 {
   "name": "flubber",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
   "main": "build/flubber.min.js",
   "browser": "build/flubber.min.js",
@@ -15,14 +15,7 @@
     "type": "git",
     "url": "https://github.com/veltman/flubber.git"
   },
-  "keywords": [
-    "shape",
-    "morph",
-    "tween",
-    "svg",
-    "animation",
-    "triangulation"
-  ],
+  "keywords": ["shape", "morph", "tween", "svg", "animation", "triangulation"],
   "author": "Noah Veltman (@veltman)",
   "license": "MIT",
   "bugs": {
@@ -49,11 +42,7 @@
     "topojson-client": "^3.0.0"
   },
   "babel": {
-    "presets": [
-      "env"
-    ],
-    "plugins": [
-      "add-module-exports"
-    ]
+    "presets": ["env"],
+    "plugins": ["add-module-exports"]
   }
 }

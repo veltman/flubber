@@ -2467,16 +2467,16 @@ function approximateRing(parsed, maxSegmentLength) {
 }
 
 function measure(d) {
-  if (typeof module !== "undefined" && module.exports) {
-    return svgPathProperties(d);
-  } else {
-    var svg = window.document.createElementNS("http://www.w3.org/2000/svg", "svg"),
-      path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    path.setAttributeNS(null, "d", d);
-
-    return path;
+  // Use native browser measurement if running in browser
+  if (typeof window !== "undefined" && window && window.document) {
+    try {
+      var path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttributeNS(null, "d", d);
+      return path;
+    } catch (e) {}
   }
+  // Fall back to svg-path-properties
+  return svgPathProperties(d);
 }
 
 function addPoints(ring, numPoints) {
@@ -3888,12 +3888,10 @@ function cut(ring) {
 // With 8 or fewer shapes, find the best permutation
 // Skip if array is huge (9+ shapes)
 var pieceOrder = function(start, end) {
-  var distances = start.map(function (p1) { return end.map(function (p2) { return squaredDistance(p1, p2); }); }),
-    order = bestOrder(start, end, distances);
-
   if (start.length > 8) {
     return start.map(function (d, i) { return i; });
   }
+  var distances = start.map(function (p1) { return end.map(function (p2) { return squaredDistance(p1, p2); }); });
   return bestOrder(start, end, distances);
 };
 

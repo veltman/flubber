@@ -90,14 +90,14 @@ function approximateRing(parsed, maxSegmentLength) {
 }
 
 function measure(d) {
-  if (typeof module !== "undefined" && module.exports) {
-    return svgPathProperties(d);
-  } else {
-    let svg = window.document.createElementNS("http://www.w3.org/2000/svg", "svg"),
-      path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    path.setAttributeNS(null, "d", d);
-
-    return path;
+  // Use native browser measurement if running in browser
+  if (typeof window !== "undefined" && window && window.document) {
+    try {
+      let path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttributeNS(null, "d", d);
+      return path;
+    } catch (e) {}
   }
+  // Fall back to svg-path-properties
+  return svgPathProperties(d);
 }
