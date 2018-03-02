@@ -27,6 +27,10 @@ export function splitPathString(str) {
   return split(parse(str));
 }
 
+export function transformPathString(path,str) {
+  return new Path(path).transform(str).toString();
+}
+
 export function pathStringToRing(str, maxSegmentLength) {
   let parsed = parse(str);
 

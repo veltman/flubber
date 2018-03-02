@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.flubber = global.flubber || {})));
+	(factory((global.flubber = {})));
 }(this, (function (exports) { 'use strict';
 
 var polygonArea = function(polygon) {
@@ -2155,13 +2155,16 @@ var svgPathProperties = function(svgString) {
     var cur = [0, 0];
     var prev_point = [0, 0];
     var curve;
+    var ringStart;
     for (var i = 0; i < parsed.length; i++){
       //moveTo
       if(parsed[i][0] === "M"){
         cur = [parsed[i][1], parsed[i][2]];
+        ringStart = [cur[0], cur[1]];
         functions.push(null);
       } else if(parsed[i][0] === "m"){
         cur = [parsed[i][1] + cur[0], parsed[i][2] + cur[1]];
+        ringStart = [cur[0], cur[1]];
         functions.push(null);
       }
       //lineTo
@@ -2191,9 +2194,9 @@ var svgPathProperties = function(svgString) {
         cur[1] = parsed[i][1] + cur[1];
       //Close path
       }  else if(parsed[i][0] === "z" || parsed[i][0] === "Z"){
-        length = length + Math.sqrt(Math.pow(parsed[0][1] - cur[0], 2) + Math.pow(parsed[0][2] - cur[1], 2));
-        functions.push(new LinearPosition(cur[0], parsed[0][1], cur[1], parsed[0][2]));
-        cur = [parsed[0][1], parsed[0][2]];
+        length = length + Math.sqrt(Math.pow(ringStart[0] - cur[0], 2) + Math.pow(ringStart[1] - cur[1], 2));
+        functions.push(new LinearPosition(cur[0], ringStart[0], cur[1], ringStart[1]));
+        cur = [ringStart[0], ringStart[1]];
       }
       //Cubic Bezier curves
       else if(parsed[i][0] === "C"){
@@ -2227,14 +2230,22 @@ var svgPathProperties = function(svgString) {
       }
       //Quadratic Bezier curves
       else if(parsed[i][0] === "Q"){
-        curve = new Bezier(cur[0], cur[1] , parsed[i][1], parsed[i][2] , parsed[i][3], parsed[i][4]);
+        if(cur[0] == parsed[i][1] && cur[1] == parsed[i][2]){
+          curve = new LinearPosition(parsed[i][1], parsed[i][3], parsed[i][2], parsed[i][4]);
+        } else {
+          curve = new Bezier(cur[0], cur[1] , parsed[i][1], parsed[i][2] , parsed[i][3], parsed[i][4]);
+        }
         length = length + curve.getTotalLength();
         functions.push(curve);
         cur = [parsed[i][3], parsed[i][4]];
         prev_point = [parsed[i][1], parsed[i][2]];
 
       }  else if(parsed[i][0] === "q"){
-        curve = new Bezier(cur[0], cur[1] , cur[0] + parsed[i][1], cur[1] + parsed[i][2] , cur[0] + parsed[i][3], cur[1] + parsed[i][4]);
+        if(!(parsed[i][1] == 0 && parsed[i][2] == 0)){
+          curve = new Bezier(cur[0], cur[1] , cur[0] + parsed[i][1], cur[1] + parsed[i][2] , cur[0] + parsed[i][3], cur[1] + parsed[i][4]);
+        } else {
+          curve = new LinearPosition(cur[0] + parsed[i][1], cur[0] + parsed[i][3], cur[1] + parsed[i][2], cur[1] + parsed[i][4]);
+        }
         length = length + curve.getTotalLength();
         prev_point = [cur[0] + parsed[i][1], cur[1] + parsed[i][2]];
         cur = [parsed[i][3] + cur[0], parsed[i][4] + cur[1]];
@@ -2296,6 +2307,27 @@ var svgPathProperties = function(svgString) {
   svgProperties.getPropertiesAtLength = function(fractionLength){
     var fractionPart = getPartAtLength(fractionLength);
     return functions[fractionPart.i].getPropertiesAtLength(fractionPart.fraction);
+  };
+
+  svgProperties.getParts = function(){
+    var parts = [];
+    for(var i = 0; i< functions.length; i++){
+      if(functions[i] != null){
+        var properties = {};
+        properties['start'] = functions[i].getPointAtLength(0);
+        properties['end'] = functions[i].getPointAtLength(partial_lengths[i] - partial_lengths[i-1]);
+        properties['length'] = partial_lengths[i] - partial_lengths[i-1];
+        (function(func){
+          properties['getPointAtLength'] = function(d){return func.getPointAtLength(d);};
+          properties['getTangentAtLength'] = function(d){return func.getTangentAtLength(d);};
+          properties['getPropertiesAtLength'] = function(d){return func.getPropertiesAtLength(d);};
+        })(functions[i]);
+        
+        parts.push(properties);
+      }
+    }
+  
+    return parts;
   };
 
   var getPartAtLength = function(fractionLength){
@@ -2378,7 +2410,7 @@ var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or a
 
 var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
 
-function parse$$1(str) {
+function parse(str) {
   return new index(str).abs();
 }
 
@@ -2398,11 +2430,15 @@ function toPathString(ring) {
 }
 
 function splitPathString(str) {
-  return split(parse$$1(str));
+  return split(parse(str));
+}
+
+function transformPathString(path,str) {
+  return new index(path).transform(str).toString();
 }
 
 function pathStringToRing(str, maxSegmentLength) {
-  var parsed = parse$$1(str);
+  var parsed = parse(str);
 
   return exactRing(parsed) || approximateRing(parsed, maxSegmentLength);
 }
@@ -3834,7 +3870,7 @@ function createTopology(triangles, ring) {
 
 function collapseTopology(topology, numPieces) {
   var geometries = topology.objects.triangles.geometries,
-    bisect$$1 = bisector(function (d) { return d.area; }).left;
+    bisect = bisector(function (d) { return d.area; }).left;
 
   while (geometries.length > numPieces) {
     mergeSmallestFeature();
@@ -3865,7 +3901,7 @@ function collapseTopology(topology, numPieces) {
     geometries.shift();
 
     // Add new merged shape in sorted order
-    geometries.splice(bisect$$1(geometries, merged.area), 0, merged);
+    geometries.splice(bisect(geometries, merged.area), 0, merged);
   }
 }
 
@@ -4194,6 +4230,7 @@ exports.combine = combine$1;
 exports.interpolateAll = interpolateAll;
 exports.splitPathString = splitPathString;
 exports.toPathString = toPathString;
+exports.transformPathString = transformPathString;
 exports.fromCircle = fromCircle;
 exports.toCircle = toCircle;
 exports.fromRect = fromRect;
