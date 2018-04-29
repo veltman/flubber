@@ -3,6 +3,7 @@ import { svgPathProperties } from "svg-path-properties";
 import normalizeRing from "./normalize.js";
 import { isFiniteNumber } from "./math.js";
 import { INVALID_INPUT } from "./errors.js";
+import approximate from "approximate-curve";
 
 function parse(str) {
   return new Path(str).abs();
@@ -30,7 +31,7 @@ export function splitPathString(str) {
 export function pathStringToRing(str, maxSegmentLength) {
   let parsed = parse(str);
 
-  return exactRing(parsed) || approximateRing(parsed, maxSegmentLength);
+  return exactRing(parsed) || approximateRing(parsed);
 }
 
 function exactRing(parsed) {
@@ -71,17 +72,7 @@ function approximateRing(parsed, maxSegmentLength) {
     throw new TypeError(INVALID_INPUT);
   }
 
-  m = measure(ringPath);
-  len = m.getTotalLength();
-
-  if (maxSegmentLength && isFiniteNumber(maxSegmentLength) && maxSegmentLength > 0) {
-    numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
-  }
-
-  for (let i = 0; i < numPoints; i++) {
-    let p = m.getPointAtLength(len * i / numPoints);
-    ring.push([p.x, p.y]);
-  }
+  ring = approximate(ring).map(point => [point.x, point.y]);
 
   return {
     ring,
