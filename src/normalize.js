@@ -17,7 +17,15 @@ export default function normalizeRing(ring, maxSegmentLength) {
 
   points = ring.slice(0);
 
+
   if (!validRing(points)) {
+    const mm = points.find(point => !(
+      Array.isArray(point) &&
+      point.length >= 2 &&
+      isFiniteNumber(point[0]) &&
+      isFiniteNumber(point[1])
+    ));
+    // console.log(mm);
     throw new TypeError(INVALID_INPUT);
   }
 
