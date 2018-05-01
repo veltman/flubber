@@ -3,7 +3,8 @@ import { svgPathProperties } from "svg-path-properties";
 import normalizeRing from "./normalize.js";
 import { isFiniteNumber } from "./math.js";
 import { INVALID_INPUT } from "./errors.js";
-import approximate from "approximate-curve";
+import bezier from "adaptive-bezier-curve";
+import quadratic from "adaptive-quadratic-curve";
 
 function parse(str) {
   return new Path(str).abs();
@@ -61,7 +62,7 @@ function exactRing(parsed) {
 }
 
 function approximateRing(parsed, maxSegmentLength) {
-  let ringPath = split(parsed)[0],
+  let ringPath = Array.isArray(parsed.segments),
     ring = [],
     props,
     len,
@@ -69,10 +70,35 @@ function approximateRing(parsed, maxSegmentLength) {
     numPoints = 3;
 
   if (!ringPath) {
-    throw new TypeError(INVALID_INPUT);
+      throw new TypeError(INVALID_INPUT);
   }
 
-  ring = approximate(ring).map(point => [point.x, point.y]);
+  const segments = parsed.segments;
+  for (let i = 0; i < segments.length; i++) {
+    const point = segments[i];
+    const prevPoint = ring[ring.length - 1];
+    const letter = point.shift();
+    if (letter === "M" || letter === "L") {
+      ring.push(point);
+    } else if (letter === "V") {
+      ring.push([prevPoint[0], point[0]]);
+    } else if (letter === "H") {
+      ring.push([point[0], prevPoint[1]]);
+    } else if (letter === "C") {
+      const bezierPoint = bezier(prevPoint, [point[0], point[1]], [point[2], point[3]], [point[4], point[5]]);
+      ring.push(...bezierPoint);
+    } else if (letter === "Q" || letter === "S" || letter === "T") {
+      if (letter === "T") {
+        letter.unshift(...prevPoint);
+      }
+      const quadraticPoint = quadratic(prevPoint, [point[0], point[1]], [point[2], point[3]]);
+      ring.push(...quadraticPoint);
+    } else {
+      if (point.length > 0) {
+        ring.push(point);
+      }
+    }
+  }
 
   return {
     ring,
