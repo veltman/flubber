@@ -3,6 +3,7 @@
   "version": "0.4.2",
   "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
   "main": "build/flubber.min.js",
+  "types": "types",
   "browser": "build/flubber.min.js",
   "scripts": {
     "test": "babel-tape-runner 'test/**-test.js'",
