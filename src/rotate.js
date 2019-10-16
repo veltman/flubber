@@ -2,15 +2,15 @@ import { distance } from "./math.js";
 
 export default function(ring, vs) {
   let len = ring.length,
-      min = Infinity,
-      bestOffset,
-      sumOfSquares,
-      spliced;
+    min = Infinity,
+    bestOffset,
+    sumOfSquares,
+    spliced;
 
   for (let offset = 0; offset < len; offset++) {
     sumOfSquares = 0;
 
-    vs.forEach(function(p, i){
+    vs.forEach(function(p, i) {
       let d = distance(ring[(offset + i) % len], p);
       sumOfSquares += d * d;
     });

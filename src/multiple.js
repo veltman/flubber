@@ -1,5 +1,4 @@
 import { interpolateRing } from "./interpolate.js";
-import { toPathString } from "./svg.js";
 import { addPoints } from "./add.js";
 import normalizeRing from "./normalize.js";
 import triangulate from "./triangulate.js";
@@ -26,7 +25,13 @@ export function separate(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { match: true, string, single, t0, t1 });
+  return interpolateSets(fromRings, toRings, {
+    match: true,
+    string,
+    single,
+    t0,
+    t1
+  });
 }
 
 export function combine(
@@ -34,8 +39,14 @@ export function combine(
   toShape,
   { maxSegmentLength = 10, string = true, single = false } = {}
 ) {
-  let interpolators = separate(toShape, fromShapes, { maxSegmentLength, string, single });
-  return single ? t => interpolators(1 - t) : interpolators.map(fn => t => fn(1 - t));
+  let interpolators = separate(toShape, fromShapes, {
+    maxSegmentLength,
+    string,
+    single
+  });
+  return single
+    ? t => interpolators(1 - t)
+    : interpolators.map(fn => t => fn(1 - t));
 }
 
 export function interpolateAll(
@@ -70,12 +81,26 @@ export function interpolateAll(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string, single, t0, t1, match: false });
+  return interpolateSets(fromRings, toRings, {
+    string,
+    single,
+    t0,
+    t1,
+    match: false
+  });
 }
 
-function interpolateSets(fromRings, toRings, { string, single, t0, t1, match } = {}) {
-  let order = match ? pieceOrder(fromRings, toRings) : fromRings.map((d, i) => i),
-    interpolators = order.map((d, i) => interpolateRing(fromRings[d], toRings[i], string));
+function interpolateSets(
+  fromRings,
+  toRings,
+  { string, single, t0, t1, match } = {}
+) {
+  let order = match
+      ? pieceOrder(fromRings, toRings)
+      : fromRings.map((d, i) => i),
+    interpolators = order.map((d, i) =>
+      interpolateRing(fromRings[d], toRings[i], string)
+    );
 
   if (match && Array.isArray(t0)) {
     t0 = order.map(d => t0[d]);
@@ -96,7 +121,8 @@ function interpolateSets(fromRings, toRings, { string, single, t0, t1, match } =
       : t => interpolators.map(fn => fn(t));
 
     if (string && (t0 || t1)) {
-      return t => (t < 1e-4 && t0) || (1 - t < 1e-4 && t1) || multiInterpolator(t);
+      return t =>
+        (t < 1e-4 && t0) || (1 - t < 1e-4 && t1) || multiInterpolator(t);
     }
     return multiInterpolator;
   } else if (string) {

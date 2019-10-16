@@ -15,7 +15,11 @@ export function addPoints(ring, numPoints) {
       segment = distance(a, b);
 
     if (insertAt <= cursor + segment) {
-      ring.splice(i + 1, 0, segment ? pointAlong(a, b, (insertAt - cursor) / segment) : a.slice(0));
+      ring.splice(
+        i + 1,
+        0,
+        segment ? pointAlong(a, b, (insertAt - cursor) / segment) : a.slice(0)
+      );
       insertAt += step;
       continue;
     }

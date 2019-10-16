@@ -62,7 +62,9 @@ export function collapseTopology(topology, numPieces) {
   }
 
   if (numPieces > geometries.length) {
-    throw new RangeError("Can't collapse topology into " + numPieces + " pieces.");
+    throw new RangeError(
+      "Can't collapse topology into " + numPieces + " pieces."
+    );
   }
 
   return feature(topology, topology.objects.triangles).features.map(f => {
