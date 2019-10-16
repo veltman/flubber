@@ -2,3 +2,5 @@ node_modules/*
 junk/*
 .DS_Store
 *.log
+yarn.lock
+package-lock.json

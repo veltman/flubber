@@ -3,11 +3,12 @@
   "version": "0.4.2",
   "description": "Best-guess methods for smoothly interpolating and animating between shapes.",
   "main": "build/flubber.min.js",
-  "browser": "build/flubber.min.js",
   "scripts": {
     "test": "babel-tape-runner 'test/**-test.js'",
     "pretest": "rm -rf build && mkdir build && rollup --config rollup.config.js",
-    "build": "npm run pretest && uglifyjs -m -c -- build/flubber.js > build/flubber.min.js"
+    "build": "npm run pretest && npm run build:slim && npm run build:full",
+    "build:slim": "uglifyjs -m -c -- build/flubber.slim.js > build/flubber.slim.min.js",
+    "build:full": "uglifyjs -m -c -- build/flubber.js > build/flubber.min.js"
   },
   "module": "index",
   "jsnext:main": "index",
@@ -33,10 +34,11 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.4.0",
     "babel-tape-runner": "^2.0.1",
-    "rollup": "^0.41.6",
-    "rollup-plugin-buble": "^0.15.0",
-    "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-node-resolve": "^2.1.1",
+    "rollup": "^1.24.0",
+    "rollup-plugin-buble": "^0.19.8",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-virtual": "^1.0.1",
     "tape": "^4.6.3",
     "uglify-js": "^2.8.20"
   },
