@@ -2,6 +2,8 @@ junk/
 test/
 demos/
 build/flubber.js
+build/flubber.slim.js
+build/flubber.slim.min.js
 rollup.config.js
 .gitignore
 .travis.yml
