@@ -2,14 +2,18 @@ import tape from "tape";
 
 // From https://github.com/d3/d3-geo/
 function inDelta(actual, expected, delta) {
-  return (Array.isArray(expected) ? inDeltaArray : inDeltaNumber)(actual, expected, delta);
+  return (Array.isArray(expected) ? inDeltaArray : inDeltaNumber)(
+    actual,
+    expected,
+    delta
+  );
 }
 
 function inDeltaArray(actual, expected, delta) {
-  var n = expected.length, i = -1;
+  var n = expected.length,
+    i = -1;
   if (actual.length !== n) return false;
-  while (++i < n)
-    if (!inDelta(actual[i], expected[i], delta)) return false;
+  while (++i < n) if (!inDelta(actual[i], expected[i], delta)) return false;
   return true;
 }
 

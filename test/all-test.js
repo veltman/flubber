@@ -14,10 +14,10 @@ let square = "M0,0L100,0L100,100L0,100Z",
 
 tape("all with array inputs", function(test) {
   let interpolate = interpolateAll(
-    [shapes.square1(), shapes.square2()],
-    [shapes.triangle1(), shapes.triangle2()],
-    { maxSegmentLength: Infinity }
-  ),
+      [shapes.square1(), shapes.square2()],
+      [shapes.triangle1(), shapes.triangle2()],
+      { maxSegmentLength: Infinity }
+    ),
     interpolateArray = interpolateAll(
       [shapes.square1(), shapes.square2()],
       [shapes.triangle1(), shapes.triangle2()],
@@ -41,8 +41,8 @@ tape("all with array inputs", function(test) {
 
 tape("all with string inputs", function(test) {
   let interpolate = interpolateAll([square, halfcircle], [bezier, square], {
-    maxSegmentLength: 10
-  }),
+      maxSegmentLength: 10
+    }),
     interpolateArray = interpolateAll([square, halfcircle], [bezier, square], {
       maxSegmentLength: Infinity,
       string: false
@@ -67,10 +67,10 @@ tape("all with string inputs", function(test) {
 
 tape("all with array inputs single", function(test) {
   let interpolate = interpolateAll(
-    [shapes.square1(), shapes.square2()],
-    [shapes.triangle1(), shapes.triangle2()],
-    { maxSegmentLength: Infinity, single: true }
-  ),
+      [shapes.square1(), shapes.square2()],
+      [shapes.triangle1(), shapes.triangle2()],
+      { maxSegmentLength: Infinity, single: true }
+    ),
     interpolateArray = interpolateAll(
       [shapes.square1(), shapes.square2()],
       [shapes.triangle1(), shapes.triangle2()],
@@ -102,8 +102,8 @@ tape("all with array inputs single", function(test) {
 
 tape("all with string inputs single", function(test) {
   let interpolate = interpolateAll([square, halfcircle], [bezier, square], {
-    single: true
-  }),
+      single: true
+    }),
     interpolateArray = interpolateAll([square, halfcircle], [bezier, square], {
       maxSegmentLength: Infinity,
       string: false,
@@ -133,10 +133,17 @@ tape("all with string inputs single", function(test) {
 });
 
 tape("mix-and-match", function(test) {
-  let interpolate = interpolateAll([halfcircle, shapes.square1()], [shapes.square2(), bezier]),
-    interpolateSingle = interpolateAll([halfcircle, shapes.square1()], [shapes.square2(), bezier], {
-      single: true
-    });
+  let interpolate = interpolateAll(
+      [halfcircle, shapes.square1()],
+      [shapes.square2(), bezier]
+    ),
+    interpolateSingle = interpolateAll(
+      [halfcircle, shapes.square1()],
+      [shapes.square2(), bezier],
+      {
+        single: true
+      }
+    );
 
   test.equal(interpolate[0](0), halfcircle);
   test.notDeepEqual(interpolate[1](0), shapes.square1());
@@ -154,10 +161,19 @@ tape("errors", function(test) {
   test.throws(() => interpolateAll(1), err);
   test.throws(() => interpolateAll([square, square], [square]), err);
   test.throws(() => interpolateAll([], []), err);
-  test.throws(() => interpolateAll([square, square], [square, square, square]), err);
+  test.throws(
+    () => interpolateAll([square, square], [square, square, square]),
+    err
+  );
 
-  test.doesNotThrow(() => interpolateAll([square, square], [square, square]), err);
-  test.doesNotThrow(() => interpolateAll([square, ring, square], [ring, square, ring]), err);
+  test.doesNotThrow(
+    () => interpolateAll([square, square], [square, square]),
+    err
+  );
+  test.doesNotThrow(
+    () => interpolateAll([square, ring, square], [ring, square, ring]),
+    err
+  );
 
   test.end();
 });

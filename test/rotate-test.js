@@ -26,7 +26,8 @@ tape("Rotate squares successfully", function(test) {
 });
 
 tape("Min Distance", function(test) {
-  let triangle = shapes.triangle1(), alt = shapes.triangle2();
+  let triangle = shapes.triangle1(),
+    alt = shapes.triangle2();
 
   for (let i = 0; i < 3; i++) {
     let off = offsetRing(shapes.triangle2(), i);

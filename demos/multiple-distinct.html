@@ -1,61 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-</head>
-<body>
-<svg width="960" height="500"></svg>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script src="https://d3js.org/topojson.v3.min.js"></script>
-<script src="../build/flubber.min.js"></script>
-<script>
-var svg = d3.select("svg");
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <svg width="960" height="500"></svg>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="../build/flubber.min.js"></script>
+    <script>
+      var svg = d3.select("svg");
 
-d3
-  .queue()
-  .defer(d3.json, "lower48.topo.json")
-  .defer(d3.json, "hi.geo.json")
-  .await(function(err, topo, hi) {
-    var islands = hi.coordinates.map(function(d){ return d[0]; }),
-        states = topojson
-          .feature(topo, topo.objects.states)
-          .features.map(function(d) { return d.geometry.coordinates[0]; });
+      d3.queue()
+        .defer(d3.json, "lower48.topo.json")
+        .defer(d3.json, "hi.geo.json")
+        .await(function(err, topo, hi) {
+          var islands = hi.coordinates.map(function(d) {
+              return d[0];
+            }),
+            states = topojson
+              .feature(topo, topo.objects.states)
+              .features.map(function(d) {
+                return d.geometry.coordinates[0];
+              });
 
-    var paths = svg.selectAll("path")
-      .data(d3.range(islands.length))
-      .enter()
-      .append("path");
+          var paths = svg
+            .selectAll("path")
+            .data(d3.range(islands.length))
+            .enter()
+            .append("path");
 
-    d3.shuffle(states);
+          d3.shuffle(states);
 
-    draw();
+          draw();
 
-    function draw() {
-      var start = states[0],
-          next = states[1];
+          function draw() {
+            var start = states[0],
+              next = states[1];
 
-      var outward = flubber.separate(start, islands, { maxSegmentLength: 20 }),
-          inward = flubber.combine(islands, next, { maxSegmentLength: 20 });
+            var outward = flubber.separate(start, islands, {
+                maxSegmentLength: 20
+              }),
+              inward = flubber.combine(islands, next, { maxSegmentLength: 20 });
 
-      states.push(states.shift());
+            states.push(states.shift());
 
-      paths
-        .attr("d", "M" + start.join("L") + "Z")
-        .attr("fill", "#e3e3e3")
-        .transition()
-        .delay(600)
-        .duration(2000)
-        .attr("fill", function(i) {
-          return d3.interpolateRainbow(i / islands.length);
-        })
-        .attrTween("d", function(i) { return outward[i]; })
-        .transition()
-        .delay(600)
-        .attrTween("d", function(i) { return inward[i]; })
-        .attr("fill", "#e3e3e3")
-        .filter(function(i) { return !i; })
-        .on("end", draw);
-
-    }
-  });
-</script>
+            paths
+              .attr("d", "M" + start.join("L") + "Z")
+              .attr("fill", "#e3e3e3")
+              .transition()
+              .delay(600)
+              .duration(2000)
+              .attr("fill", function(i) {
+                return d3.interpolateRainbow(i / islands.length);
+              })
+              .attrTween("d", function(i) {
+                return outward[i];
+              })
+              .transition()
+              .delay(600)
+              .attrTween("d", function(i) {
+                return inward[i];
+              })
+              .attr("fill", "#e3e3e3")
+              .filter(function(i) {
+                return !i;
+              })
+              .on("end", draw);
+          }
+        });
+    </script>
+  </body>
+</html>

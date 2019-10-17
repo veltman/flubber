@@ -25,12 +25,12 @@ tape("Add points", function(test) {
 
   test.inDelta(added, [
     [0, 0],
-    [100 * 2 / 3, 0],
+    [(100 * 2) / 3, 0],
     [100, 0],
     [100, 100],
     [100, 100],
     [0, 100],
-    [0, 100 * 2 / 3]
+    [0, (100 * 2) / 3]
   ]);
 
   test.end();
@@ -39,7 +39,16 @@ tape("Add points", function(test) {
 tape("Bisect segments", function(test) {
   let added = shapes.square1(),
     rect = shapes.rect(),
-    once = [[0, 0], [50, 0], [100, 0], [100, 50], [100, 100], [50, 100], [0, 100], [0, 50]],
+    once = [
+      [0, 0],
+      [50, 0],
+      [100, 0],
+      [100, 50],
+      [100, 100],
+      [50, 100],
+      [0, 100],
+      [0, 50]
+    ],
     twice = [
       [0, 0],
       [25, 0],
@@ -115,7 +124,14 @@ tape("Zero-length handling", function(test) {
 
   test.inDelta(added.single, [[0, 0], [0, 0], [0, 0]]);
 
-  test.inDelta(added.partial, [[0, 0], [0.5, 0.5], [1, 1], [1, 1], [1, 1], [0.5, 0.5]]);
+  test.inDelta(added.partial, [
+    [0, 0],
+    [0.5, 0.5],
+    [1, 1],
+    [1, 1],
+    [1, 1],
+    [0.5, 0.5]
+  ]);
 
   test.end();
 });

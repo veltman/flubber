@@ -1,5 +1,5 @@
 import { supertape } from "./utils.js";
-import { default as triangulate, cut } from "../src/triangulate.js";
+import { cut } from "../src/triangulate.js";
 import { createTopology, collapseTopology } from "../src/topology.js";
 import * as shapes from "./shapes.js";
 
@@ -8,7 +8,10 @@ let tape = supertape();
 tape("Triangulate a square", function(test) {
   let square = shapes.square1();
 
-  test.deepEqual(cut(square), [[[2, 3], [3, 0], [0, 2]], [[0, 1], [1, 2], [2, 0]]]);
+  test.deepEqual(cut(square), [
+    [[2, 3], [3, 0], [0, 2]],
+    [[0, 1], [1, 2], [2, 0]]
+  ]);
   test.end();
 });
 
@@ -41,7 +44,10 @@ tape("Create/collapse a triangulation", function(test) {
   // Don't change anything
   let collapsed = collapseTopology(topology, 2);
 
-  test.deepEqual(collapsed, [[[100, 100], [0, 100], [0, 0]], [[0, 0], [100, 0], [100, 100]]]);
+  test.deepEqual(collapsed, [
+    [[100, 100], [0, 100], [0, 0]],
+    [[0, 0], [100, 0], [100, 100]]
+  ]);
   test.equal(topology.objects.triangles.geometries.length, 2);
 
   collapsed = collapseTopology(topology, 1);

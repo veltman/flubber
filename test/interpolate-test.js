@@ -13,10 +13,18 @@ tape("interpolatePoints", function(test) {
     interpolateString = interpolatePoints(square1, square2, true);
 
   test.deepEqual(interpolateArray(0), square1);
-  test.deepEqual(interpolateArray(0.5), [[50, 0], [150, 0], [150, 100], [50, 100]]);
+  test.deepEqual(interpolateArray(0.5), [
+    [50, 0],
+    [150, 0],
+    [150, 100],
+    [50, 100]
+  ]);
   test.deepEqual(interpolateArray(1), square2);
   test.deepEqual(interpolateString(0), toPathString(square1));
-  test.deepEqual(interpolateString(0.5), toPathString([[50, 0], [150, 0], [150, 100], [50, 100]]));
+  test.deepEqual(
+    interpolateString(0.5),
+    toPathString([[50, 0], [150, 0], [150, 100], [50, 100]])
+  );
   test.deepEqual(interpolateString(1), toPathString(square2));
 
   test.end();

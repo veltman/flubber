@@ -1,7 +1,6 @@
 import { supertape } from "./utils.js";
 import normalizeRing from "../src/normalize.js";
 import interpolate from "../src/interpolate.js";
-import { separate, combine } from "../src/multiple.js";
 import { toPathString, splitPathString, pathStringToRing } from "../src/svg.js";
 
 let tape = supertape();
@@ -21,18 +20,36 @@ tape("splitPathString", function(test) {
   test.deepEqual(splitPathString("M1,2L3,4Z"), ["M1 2L3 4Z"]);
 
   // Multiple
-  test.deepEqual(splitPathString("M1,2L3,4ZM5,6L7,8Z"), ["M1 2L3 4Z", "M5 6L7 8Z"]);
+  test.deepEqual(splitPathString("M1,2L3,4ZM5,6L7,8Z"), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
 
   // Whitespace
-  test.deepEqual(splitPathString("M1,2L3,4Z   M5,6L7,8Z"), ["M1 2L3 4Z", "M5 6L7 8Z"]);
-  test.deepEqual(splitPathString("  M1,2L3,4Z M5,6L7,8Z"), ["M1 2L3 4Z", "M5 6L7 8Z"]);
-  test.deepEqual(splitPathString("  M1,2L3,4Z M5,6L7,8Z  "), ["M1 2L3 4Z", "M5 6L7 8Z"]);
+  test.deepEqual(splitPathString("M1,2L3,4Z   M5,6L7,8Z"), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
+  test.deepEqual(splitPathString("  M1,2L3,4Z M5,6L7,8Z"), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
+  test.deepEqual(splitPathString("  M1,2L3,4Z M5,6L7,8Z  "), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
 
   // Relative
-  test.deepEqual(splitPathString("M1,2l2,2Z m4,4l2,2Z"), ["M1 2L3 4Z", "M5 6L7 8Z"]);
+  test.deepEqual(splitPathString("M1,2l2,2Z m4,4l2,2Z"), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
 
   // Implicit lineto
-  test.deepEqual(splitPathString("M1,2l2,2Z m4,4 2,2Z"), ["M1 2L3 4Z", "M5 6L7 8Z"]);
+  test.deepEqual(splitPathString("M1,2l2,2Z m4,4 2,2Z"), [
+    "M1 2L3 4Z",
+    "M5 6L7 8Z"
+  ]);
 
   test.end();
 });
@@ -90,7 +107,16 @@ tape("pathStringToRing preserve", function(test) {
     square2 = "M0,0H100V100H0Z",
     square3 = "M0,0h100v100h-100Z",
     original = [[0, 0], [100, 0], [100, 100], [0, 100]],
-    bisected = [[0, 0], [50, 0], [100, 0], [100, 50], [100, 100], [50, 100], [0, 100], [0, 50]];
+    bisected = [
+      [0, 0],
+      [50, 0],
+      [100, 0],
+      [100, 50],
+      [100, 100],
+      [50, 100],
+      [0, 100],
+      [0, 50]
+    ];
 
   test.deepEqual(pathStringToRing(square1, 125).ring, original);
   test.deepEqual(pathStringToRing(square2, 125).ring, original);
