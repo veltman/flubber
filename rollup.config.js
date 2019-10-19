@@ -3,10 +3,12 @@ import resolve from "rollup-plugin-node-resolve";
 import buble from "rollup-plugin-buble";
 
 export default {
-  entry: "index.js",
-  dest: "build/flubber.js",
-  format: "umd",
-  moduleName: "flubber",
+  input: "index.js",
+  output: {
+    file: "build/flubber.js",
+    format: "umd",
+    name: "flubber",
+  },
   plugins: [
     resolve({
       jsnext: true,

@@ -33,7 +33,7 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.4.0",
     "babel-tape-runner": "^2.0.1",
-    "rollup": "^0.41.6",
+    "rollup": "^0.64.1",
     "rollup-plugin-buble": "^0.15.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^2.1.1",
