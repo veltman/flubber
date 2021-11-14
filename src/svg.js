@@ -1,5 +1,5 @@
 import Path from "svgpath";
-import { svgPathProperties } from "svg-path-properties";
+import svgPathProperties from "svg-path-properties";
 import { isFiniteNumber } from "./math.js";
 import { INVALID_INPUT } from "./errors.js";
 
