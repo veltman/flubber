@@ -126,6 +126,10 @@ function isCommand(code) {
   return false;
 }
 
+function isArc(code) {
+  return (code | 0x20) === 0x61;
+}
+
 function isDigit(code) {
   return (code >= 48 && code <= 57);   // 0..9
 }
@@ -153,6 +157,25 @@ function skipSpaces(state) {
   while (state.index < state.max && isSpace(state.path.charCodeAt(state.index))) {
     state.index++;
   }
+}
+
+
+function scanFlag(state) {
+  var ch = state.path.charCodeAt(state.index);
+
+  if (ch === 0x30/* 0 */) {
+    state.param = 0;
+    state.index++;
+    return;
+  }
+
+  if (ch === 0x31/* 1 */) {
+    state.param = 1;
+    state.index++;
+    return;
+  }
+
+  state.err = 'SvgPath: arc flag can be 0 or 1 only (at pos ' + state.index + ')';
 }
 
 
@@ -194,7 +217,7 @@ function scanParam(state) {
     if (zeroFirst && index < max) {
       // decimal number starts with '0' such as '09' is illegal.
       if (ch && isDigit(ch)) {
-        state.err = 'SvgPath: numbers started with `0` such as `09` are ilegal (at pos ' + start + ')';
+        state.err = 'SvgPath: numbers started with `0` such as `09` are illegal (at pos ' + start + ')';
         return;
       }
     }
@@ -279,10 +302,11 @@ function finalizeSegment(state) {
 
 function scanSegment(state) {
   var max = state.max,
-      cmdCode, comma_found, need_params, i;
+      cmdCode, is_arc, comma_found, need_params, i;
 
   state.segmentStart = state.index;
   cmdCode = state.path.charCodeAt(state.index);
+  is_arc = isArc(cmdCode);
 
   if (!isCommand(cmdCode)) {
     state.err = 'SvgPath: bad command ' + state.path[state.index] + ' (at pos ' + state.index + ')';
@@ -306,7 +330,9 @@ function scanSegment(state) {
 
   for (;;) {
     for (i = need_params; i > 0; i--) {
-      scanParam(state);
+      if (is_arc && (i === 3 || i === 4)) { scanFlag(state); }
+      else { scanParam(state); }
+
       if (state.err.length) {
         return;
       }
@@ -910,6 +936,26 @@ function SvgPath(path) {
   // Transforms stack for lazy evaluation
   this.__stack    = [];
 }
+
+SvgPath.from = function (src) {
+  if (typeof src === 'string') { return new SvgPath(src); }
+
+  if (src instanceof SvgPath) {
+    // Create empty object
+    var s = new SvgPath('');
+
+    // Clone properies
+    s.err = src.err;
+    s.segments = src.segments.map(function (sgm) { return sgm.slice(); });
+    s.__stack = src.__stack.map(function (m) {
+      return matrix().matrix(m.toArray());
+    });
+
+    return s;
+  }
+
+  throw new Error('SvgPath.from: invalid param type ' + src);
+};
 
 
 SvgPath.prototype.__matrix = function (m) {
@@ -2949,7 +2995,7 @@ function eliminateHoles(data, holeIndices, outerNode, dim) {
 
     // process holes from left to right
     for (i = 0; i < queue.length; i++) {
-        eliminateHole(queue[i], outerNode);
+        outerNode = eliminateHole(queue[i], outerNode);
         outerNode = filterPoints(outerNode, outerNode.next);
     }
 
@@ -2962,11 +3008,19 @@ function compareX(a, b) {
 
 // find a bridge between vertices that connects hole with an outer ring and and link it
 function eliminateHole(hole, outerNode) {
-    outerNode = findHoleBridge(hole, outerNode);
-    if (outerNode) {
-        var b = splitPolygon(outerNode, hole);
-        filterPoints(b, b.next);
+    var bridge = findHoleBridge(hole, outerNode);
+    if (!bridge) {
+        return outerNode;
     }
+
+    var bridgeReverse = splitPolygon(bridge, hole);
+
+    // filter collinear points around the cuts
+    var filteredBridge = filterPoints(bridge, bridge.next);
+    filterPoints(bridgeReverse, bridgeReverse.next);
+
+    // Check if input node was removed by the filtering
+    return outerNode === bridge ? filteredBridge : outerNode;
 }
 
 // David Eberly's algorithm for finding a bridge between hole and outer polygon
@@ -3377,6 +3431,7 @@ var reverse = function(array, n) {
 };
 
 var feature = function(topology, o) {
+  if (typeof o === "string") { o = topology.objects[o]; }
   return o.type === "GeometryCollection"
       ? {type: "FeatureCollection", features: o.geometries.map(function(o) { return feature$1(topology, o); })}
       : feature$1(topology, o);
