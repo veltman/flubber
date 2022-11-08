@@ -611,20 +611,23 @@ var TAU = Math.PI * 2;
 
 /* eslint-disable space-infix-ops */
 
-// Calculate an angle between two vectors
+// Calculate an angle between two unit vectors
 //
-function vector_angle(ux, uy, vx, vy) {
+// Since we measure angle between radii of circular arcs,
+// we can use simplified math (without length normalization)
+//
+function unit_vector_angle(ux, uy, vx, vy) {
   var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
-  var umag = Math.sqrt(ux * ux + uy * uy);
-  var vmag = Math.sqrt(ux * ux + uy * uy);
   var dot  = ux * vx + uy * vy;
-  var div  = dot / (umag * vmag);
+
+  // Add this to work with arbitrary vectors:
+  // dot /= Math.sqrt(ux * ux + uy * uy) * Math.sqrt(vx * vx + vy * vy);
 
   // rounding errors, e.g. -1.0000000000000002 can screw up this
-  if (div >  1.0) { div =  1.0; }
-  if (div < -1.0) { div = -1.0; }
+  if (dot >  1.0) { dot =  1.0; }
+  if (dot < -1.0) { dot = -1.0; }
 
-  return sign * Math.acos(div);
+  return sign * Math.acos(dot);
 }
 
 
@@ -683,8 +686,8 @@ function get_arc_center(x1, y1, x2, y2, fa, fs, rx, ry, sin_phi, cos_phi) {
   var v2x = (-x1p - cxp) / rx;
   var v2y = (-y1p - cyp) / ry;
 
-  var theta1 = vector_angle(1, 0, v1x, v1y);
-  var delta_theta = vector_angle(v1x, v1y, v2x, v2y);
+  var theta1 = unit_vector_angle(1, 0, v1x, v1y);
+  var delta_theta = unit_vector_angle(v1x, v1y, v2x, v2y);
 
   if (fs === 0 && delta_theta > 0) {
     delta_theta -= TAU;
@@ -856,6 +859,7 @@ Ellipse.prototype.transform = function (m) {
   var l1 = JK + D/2,
       l2 = JK - D/2;
   // the x - axis - rotation angle is the argument of the l1 - eigenvector
+  /*eslint-disable indent*/
   this.ax = (Math.abs(L) < epsilon && Math.abs(l1 - K) < epsilon) ?
     90
   :
@@ -864,6 +868,7 @@ Ellipse.prototype.transform = function (m) {
     :
       L / (l1 - K)
     ) * 180 / Math.PI;
+  /*eslint-enable indent*/
 
   // if ax > 0 => rx = sqrt(l1), ry = sqrt(l2), else exchange axes and ax += 90
   if (this.ax >= 0) {
@@ -1051,14 +1056,14 @@ SvgPath.prototype.toString = function () {
   }
 
   return elements.join(' ')
-            // Optimizations: remove spaces around commands & before `-`
-            //
-            // We could also remove leading zeros for `0.5`-like values,
-            // but their count is too small to spend time for.
-            .replace(/ ?([achlmqrstvz]) ?/gi, '$1')
-            .replace(/ \-/g, '-')
-            // workaround for FontForge SVG importing bug
-            .replace(/zm/g, 'z m');
+    // Optimizations: remove spaces around commands & before `-`
+    //
+    // We could also remove leading zeros for `0.5`-like values,
+    // but their count is too small to spend time for.
+    .replace(/ ?([achlmqrstvz]) ?/gi, '$1')
+    .replace(/ \-/g, '-')
+    // workaround for FontForge SVG importing bug
+    .replace(/zm/g, 'z m');
 };
 
 
@@ -1498,9 +1503,9 @@ SvgPath.prototype.unshort = function () {
 };
 
 
-var svgpath = SvgPath;
+var svgpath$1 = SvgPath;
 
-var index = svgpath;
+var svgpath = svgpath$1;
 
 //Parses an SVG path into an object.
 //Taken from https://github.com/jkroso/parse-svg-path
@@ -1845,7 +1850,7 @@ var TAU$1 = Math.PI * 2;
 // Since we measure angle between radii of circular arcs,
 // we can use simplified math (without length normalization)
 //
-function unit_vector_angle(ux, uy, vx, vy) {
+function unit_vector_angle$1(ux, uy, vx, vy) {
   var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
   var dot  = ux * vx + uy * vy;
 
@@ -1915,8 +1920,8 @@ function get_arc_center$1(x1, y1, x2, y2, fa, fs, rx, ry, sin_phi, cos_phi) {
   var v2x = (-x1p - cxp) / rx;
   var v2y = (-y1p - cyp) / ry;
 
-  var theta1 = unit_vector_angle(1, 0, v1x, v1y);
-  var delta_theta = unit_vector_angle(v1x, v1y, v2x, v2y);
+  var theta1 = unit_vector_angle$1(1, 0, v1x, v1y);
+  var delta_theta = unit_vector_angle$1(v1x, v1y, v2x, v2y);
 
   if (fs === 0 && delta_theta > 0) {
     delta_theta -= TAU$1;
@@ -2155,13 +2160,16 @@ var svgPathProperties = function(svgString) {
     var cur = [0, 0];
     var prev_point = [0, 0];
     var curve;
+    var ringStart;
     for (var i = 0; i < parsed.length; i++){
       //moveTo
       if(parsed[i][0] === "M"){
         cur = [parsed[i][1], parsed[i][2]];
+        ringStart = [cur[0], cur[1]];
         functions.push(null);
       } else if(parsed[i][0] === "m"){
         cur = [parsed[i][1] + cur[0], parsed[i][2] + cur[1]];
+        ringStart = [cur[0], cur[1]];
         functions.push(null);
       }
       //lineTo
@@ -2191,9 +2199,9 @@ var svgPathProperties = function(svgString) {
         cur[1] = parsed[i][1] + cur[1];
       //Close path
       }  else if(parsed[i][0] === "z" || parsed[i][0] === "Z"){
-        length = length + Math.sqrt(Math.pow(parsed[0][1] - cur[0], 2) + Math.pow(parsed[0][2] - cur[1], 2));
-        functions.push(new LinearPosition(cur[0], parsed[0][1], cur[1], parsed[0][2]));
-        cur = [parsed[0][1], parsed[0][2]];
+        length = length + Math.sqrt(Math.pow(ringStart[0] - cur[0], 2) + Math.pow(ringStart[1] - cur[1], 2));
+        functions.push(new LinearPosition(cur[0], ringStart[0], cur[1], ringStart[1]));
+        cur = [ringStart[0], ringStart[1]];
       }
       //Cubic Bezier curves
       else if(parsed[i][0] === "C"){
@@ -2227,14 +2235,22 @@ var svgPathProperties = function(svgString) {
       }
       //Quadratic Bezier curves
       else if(parsed[i][0] === "Q"){
-        curve = new Bezier(cur[0], cur[1] , parsed[i][1], parsed[i][2] , parsed[i][3], parsed[i][4]);
+        if(cur[0] != parsed[i][1] && cur[1] != parsed[i][2]){
+          curve = new Bezier(cur[0], cur[1] , parsed[i][1], parsed[i][2] , parsed[i][3], parsed[i][4]);
+        } else {
+          curve = new LinearPosition(parsed[i][1], parsed[i][3], parsed[i][2], parsed[i][4]);
+        }
         length = length + curve.getTotalLength();
         functions.push(curve);
         cur = [parsed[i][3], parsed[i][4]];
         prev_point = [parsed[i][1], parsed[i][2]];
 
       }  else if(parsed[i][0] === "q"){
-        curve = new Bezier(cur[0], cur[1] , cur[0] + parsed[i][1], cur[1] + parsed[i][2] , cur[0] + parsed[i][3], cur[1] + parsed[i][4]);
+        if(!(parsed[i][1] == 0 && parsed[i][2] == 0)){
+          curve = new Bezier(cur[0], cur[1] , cur[0] + parsed[i][1], cur[1] + parsed[i][2] , cur[0] + parsed[i][3], cur[1] + parsed[i][4]);
+        } else {
+          curve = new LinearPosition(cur[0] + parsed[i][1], cur[0] + parsed[i][3], cur[1] + parsed[i][2], cur[1] + parsed[i][4]);
+        }
         length = length + curve.getTotalLength();
         prev_point = [cur[0] + parsed[i][1], cur[1] + parsed[i][2]];
         cur = [parsed[i][3] + cur[0], parsed[i][4] + cur[1]];
@@ -2318,7 +2334,9 @@ var svgPathProperties = function(svgString) {
 };
 
 function distance(a, b) {
-  return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]));
+  return Math.sqrt(
+    (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1])
+  );
 }
 
 function pointAlong(a, b, pct) {
@@ -2350,28 +2368,26 @@ function isFiniteNumber(number) {
 
 // Use plain mean if it's a degenerate polygon (colinear points or single point)
 function polygonCentroid$$1(polygon) {
-  return nonZeroArea(polygon) ? d3Centroid(polygon) : [
-    (polygon[0][0] + polygon[polygon.length - 1][0]) / 2,
-    (polygon[0][1] + polygon[polygon.length - 1][1]) / 2
-  ];
+  return nonZeroArea(polygon)
+    ? d3Centroid(polygon)
+    : [
+        (polygon[0][0] + polygon[polygon.length - 1][0]) / 2,
+        (polygon[0][1] + polygon[polygon.length - 1][1]) / 2
+      ];
 }
 
 function nonZeroArea(polygon) {
-
   for (var i = 0; i < polygon.length - 2; i++) {
-
     var a = polygon[i],
-        b = polygon[i + 1],
-        c = polygon[i + 2];
+      b = polygon[i + 1],
+      c = polygon[i + 2];
 
     if (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])) {
       return true;
     }
-
   }
 
   return false;
-
 }
 
 var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).\nExample valid ways of supplying a shape would be:\n[[0, 0], [10, 0], [10, 10]]\n\"M0,0 L10,0 L10,10Z\"\n";
@@ -2379,7 +2395,7 @@ var INVALID_INPUT = "All shapes must be supplied as arrays of [x, y] points or a
 var INVALID_INPUT_ALL = "flubber.all() expects two arrays of equal length as arguments. Each element in both arrays should be an array of [x, y] points or an SVG path string (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d).";
 
 function parse$$1(str) {
-  return new index(str).abs();
+  return new svgpath(str).abs();
 }
 
 function split(parsed) {
@@ -2439,7 +2455,6 @@ function exactRing(parsed) {
 function approximateRing(parsed, maxSegmentLength) {
   var ringPath = split(parsed)[0],
     ring = [],
-    props,
     len,
     m,
     numPoints = 3;
@@ -2451,12 +2466,16 @@ function approximateRing(parsed, maxSegmentLength) {
   m = measure(ringPath);
   len = m.getTotalLength();
 
-  if (maxSegmentLength && isFiniteNumber(maxSegmentLength) && maxSegmentLength > 0) {
+  if (
+    maxSegmentLength &&
+    isFiniteNumber(maxSegmentLength) &&
+    maxSegmentLength > 0
+  ) {
     numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
   }
 
   for (var i = 0; i < numPoints; i++) {
-    var p = m.getPointAtLength(len * i / numPoints);
+    var p = m.getPointAtLength((len * i) / numPoints);
     ring.push([p.x, p.y]);
   }
 
@@ -2470,7 +2489,10 @@ function measure(d) {
   // Use native browser measurement if running in browser
   if (typeof window !== "undefined" && window && window.document) {
     try {
-      var path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
+      var path = window.document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
       path.setAttributeNS(null, "d", d);
       return path;
     } catch (e) {}
@@ -2493,7 +2515,11 @@ function addPoints(ring, numPoints) {
       segment = distance(a, b);
 
     if (insertAt <= cursor + segment) {
-      ring.splice(i + 1, 0, segment ? pointAlong(a, b, (insertAt - cursor) / segment) : a.slice(0));
+      ring.splice(
+        i + 1,
+        0,
+        segment ? pointAlong(a, b, (insertAt - cursor) / segment) : a.slice(0)
+      );
       insertAt += step;
       continue;
     }
@@ -2573,15 +2599,15 @@ function validRing(ring) {
 
 var rotate = function(ring, vs) {
   var len = ring.length,
-      min = Infinity,
-      bestOffset,
-      sumOfSquares,
-      spliced;
+    min = Infinity,
+    bestOffset,
+    sumOfSquares,
+    spliced;
 
   var loop = function ( offset ) {
     sumOfSquares = 0;
 
-    vs.forEach(function(p, i){
+    vs.forEach(function(p, i) {
       var d = distance(ring[(offset + i) % len], p);
       sumOfSquares += d * d;
     });
@@ -2600,7 +2626,11 @@ var rotate = function(ring, vs) {
   }
 };
 
-var interpolate = function(fromShape, toShape, ref) {
+var interpolate = function(
+  fromShape,
+  toShape,
+  ref
+) {
   if ( ref === void 0 ) ref = {};
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
@@ -2610,7 +2640,10 @@ var interpolate = function(fromShape, toShape, ref) {
     interpolator = interpolateRing(fromRing, toRing, string);
 
   // Extra optimization for near either end with path strings
-  if (!string || (typeof fromShape !== "string" && typeof toShape !== "string")) {
+  if (
+    !string ||
+    (typeof fromShape !== "string" && typeof toShape !== "string")
+  ) {
     return interpolator;
   }
 
@@ -2640,6 +2673,7 @@ function interpolateRing(fromRing, toRing, string) {
 }
 
 var earcut_1 = earcut;
+var default_1 = earcut;
 
 function earcut(data, holeIndices, dim) {
 
@@ -2650,9 +2684,9 @@ function earcut(data, holeIndices, dim) {
         outerNode = linkedList(data, 0, outerLen, dim, true),
         triangles = [];
 
-    if (!outerNode) { return triangles; }
+    if (!outerNode || outerNode.next === outerNode.prev) { return triangles; }
 
-    var minX, minY, maxX, maxY, x, y, size;
+    var minX, minY, maxX, maxY, x, y, invSize;
 
     if (hasHoles) { outerNode = eliminateHoles(data, holeIndices, outerNode, dim); }
 
@@ -2670,11 +2704,12 @@ function earcut(data, holeIndices, dim) {
             if (y > maxY) { maxY = y; }
         }
 
-        // minX, minY and size are later used to transform coords into integers for z-order calculation
-        size = Math.max(maxX - minX, maxY - minY);
+        // minX, minY and invSize are later used to transform coords into integers for z-order calculation
+        invSize = Math.max(maxX - minX, maxY - minY);
+        invSize = invSize !== 0 ? 1 / invSize : 0;
     }
 
-    earcutLinked(outerNode, triangles, dim, minX, minY, size);
+    earcutLinked(outerNode, triangles, dim, minX, minY, invSize);
 
     return triangles;
 }
@@ -2710,7 +2745,7 @@ function filterPoints(start, end) {
         if (!p.steiner && (equals(p, p.next) || area(p.prev, p, p.next) === 0)) {
             removeNode(p);
             p = end = p.prev;
-            if (p === p.next) { return null; }
+            if (p === p.next) { break; }
             again = true;
 
         } else {
@@ -2722,11 +2757,11 @@ function filterPoints(start, end) {
 }
 
 // main ear slicing loop which triangulates a polygon (given as a linked list)
-function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
+function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass) {
     if (!ear) { return; }
 
     // interlink polygon nodes in z-order
-    if (!pass && size) { indexCurve(ear, minX, minY, size); }
+    if (!pass && invSize) { indexCurve(ear, minX, minY, invSize); }
 
     var stop = ear,
         prev, next;
@@ -2736,7 +2771,7 @@ function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
         prev = ear.prev;
         next = ear.next;
 
-        if (size ? isEarHashed(ear, minX, minY, size) : isEar(ear)) {
+        if (invSize ? isEarHashed(ear, minX, minY, invSize) : isEar(ear)) {
             // cut off the triangle
             triangles.push(prev.i / dim);
             triangles.push(ear.i / dim);
@@ -2744,7 +2779,7 @@ function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
 
             removeNode(ear);
 
-            // skipping the next vertice leads to less sliver triangles
+            // skipping the next vertex leads to less sliver triangles
             ear = next.next;
             stop = next.next;
 
@@ -2757,16 +2792,16 @@ function earcutLinked(ear, triangles, dim, minX, minY, size, pass) {
         if (ear === stop) {
             // try filtering points and slicing again
             if (!pass) {
-                earcutLinked(filterPoints(ear), triangles, dim, minX, minY, size, 1);
+                earcutLinked(filterPoints(ear), triangles, dim, minX, minY, invSize, 1);
 
             // if this didn't work, try curing all small self-intersections locally
             } else if (pass === 1) {
-                ear = cureLocalIntersections(ear, triangles, dim);
-                earcutLinked(ear, triangles, dim, minX, minY, size, 2);
+                ear = cureLocalIntersections(filterPoints(ear), triangles, dim);
+                earcutLinked(ear, triangles, dim, minX, minY, invSize, 2);
 
             // as a last resort, try splitting the remaining polygon into two
             } else if (pass === 2) {
-                splitEarcut(ear, triangles, dim, minX, minY, size);
+                splitEarcut(ear, triangles, dim, minX, minY, invSize);
             }
 
             break;
@@ -2794,7 +2829,7 @@ function isEar(ear) {
     return true;
 }
 
-function isEarHashed(ear, minX, minY, size) {
+function isEarHashed(ear, minX, minY, invSize) {
     var a = ear.prev,
         b = ear,
         c = ear.next;
@@ -2808,27 +2843,39 @@ function isEarHashed(ear, minX, minY, size) {
         maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
 
     // z-order range for the current triangle bbox;
-    var minZ = zOrder(minTX, minTY, minX, minY, size),
-        maxZ = zOrder(maxTX, maxTY, minX, minY, size);
+    var minZ = zOrder(minTX, minTY, minX, minY, invSize),
+        maxZ = zOrder(maxTX, maxTY, minX, minY, invSize);
 
-    // first look for points inside the triangle in increasing z-order
-    var p = ear.nextZ;
+    var p = ear.prevZ,
+        n = ear.nextZ;
 
-    while (p && p.z <= maxZ) {
+    // look for points inside the triangle in both directions
+    while (p && p.z >= minZ && n && n.z <= maxZ) {
         if (p !== ear.prev && p !== ear.next &&
             pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
             area(p.prev, p, p.next) >= 0) { return false; }
-        p = p.nextZ;
+        p = p.prevZ;
+
+        if (n !== ear.prev && n !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, n.x, n.y) &&
+            area(n.prev, n, n.next) >= 0) { return false; }
+        n = n.nextZ;
     }
 
-    // then look for points in decreasing z-order
-    p = ear.prevZ;
-
+    // look for remaining points in decreasing z-order
     while (p && p.z >= minZ) {
         if (p !== ear.prev && p !== ear.next &&
             pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
             area(p.prev, p, p.next) >= 0) { return false; }
         p = p.prevZ;
+    }
+
+    // look for remaining points in increasing z-order
+    while (n && n.z <= maxZ) {
+        if (n !== ear.prev && n !== ear.next &&
+            pointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, n.x, n.y) &&
+            area(n.prev, n, n.next) >= 0) { return false; }
+        n = n.nextZ;
     }
 
     return true;
@@ -2856,11 +2903,11 @@ function cureLocalIntersections(start, triangles, dim) {
         p = p.next;
     } while (p !== start);
 
-    return p;
+    return filterPoints(p);
 }
 
 // try splitting polygon into two and triangulate them independently
-function splitEarcut(start, triangles, dim, minX, minY, size) {
+function splitEarcut(start, triangles, dim, minX, minY, invSize) {
     // look for a valid diagonal that divides the polygon into two
     var a = start;
     do {
@@ -2875,8 +2922,8 @@ function splitEarcut(start, triangles, dim, minX, minY, size) {
                 c = filterPoints(c, c.next);
 
                 // run earcut on each half
-                earcutLinked(a, triangles, dim, minX, minY, size);
-                earcutLinked(c, triangles, dim, minX, minY, size);
+                earcutLinked(a, triangles, dim, minX, minY, invSize);
+                earcutLinked(c, triangles, dim, minX, minY, invSize);
                 return;
             }
             b = b.next;
@@ -2933,7 +2980,7 @@ function findHoleBridge(hole, outerNode) {
     // find a segment intersected by a ray from the hole's leftmost point to the left;
     // segment's endpoint with lesser x will be potential connection point
     do {
-        if (hy <= p.y && hy >= p.next.y) {
+        if (hy <= p.y && hy >= p.next.y && p.next.y !== p.y) {
             var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
             if (x <= hx && x > qx) {
                 qx = x;
@@ -2949,7 +2996,7 @@ function findHoleBridge(hole, outerNode) {
 
     if (!m) { return null; }
 
-    if (hx === qx) { return m.prev; } // hole touches outer segment; pick lower endpoint
+    if (hx === qx) { return m; } // hole touches outer segment; pick leftmost endpoint
 
     // look for points inside the triangle of hole point, segment intersection and endpoint;
     // if there are no points found, we have a valid connection;
@@ -2961,31 +3008,37 @@ function findHoleBridge(hole, outerNode) {
         tanMin = Infinity,
         tan;
 
-    p = m.next;
+    p = m;
 
-    while (p !== stop) {
-        if (hx >= p.x && p.x >= mx &&
+    do {
+        if (hx >= p.x && p.x >= mx && hx !== p.x &&
                 pointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
 
             tan = Math.abs(hy - p.y) / (hx - p.x); // tangential
 
-            if ((tan < tanMin || (tan === tanMin && p.x > m.x)) && locallyInside(p, hole)) {
+            if (locallyInside(p, hole) &&
+                (tan < tanMin || (tan === tanMin && (p.x > m.x || (p.x === m.x && sectorContainsSector(m, p)))))) {
                 m = p;
                 tanMin = tan;
             }
         }
 
         p = p.next;
-    }
+    } while (p !== stop);
 
     return m;
 }
 
+// whether sector in vertex m contains sector in vertex p in the same coordinates
+function sectorContainsSector(m, p) {
+    return area(m.prev, m, p.prev) < 0 && area(p.next, m, m.next) < 0;
+}
+
 // interlink polygon nodes in z-order
-function indexCurve(start, minX, minY, size) {
+function indexCurve(start, minX, minY, invSize) {
     var p = start;
     do {
-        if (p.z === null) { p.z = zOrder(p.x, p.y, minX, minY, size); }
+        if (p.z === null) { p.z = zOrder(p.x, p.y, minX, minY, invSize); }
         p.prevZ = p.prev;
         p.nextZ = p.next;
         p = p.next;
@@ -3018,20 +3071,11 @@ function sortLinked(list) {
                 q = q.nextZ;
                 if (!q) { break; }
             }
-
             qSize = inSize;
 
             while (pSize > 0 || (qSize > 0 && q)) {
 
-                if (pSize === 0) {
-                    e = q;
-                    q = q.nextZ;
-                    qSize--;
-                } else if (qSize === 0 || !q) {
-                    e = p;
-                    p = p.nextZ;
-                    pSize--;
-                } else if (p.z <= q.z) {
+                if (pSize !== 0 && (qSize === 0 || !q || p.z <= q.z)) {
                     e = p;
                     p = p.nextZ;
                     pSize--;
@@ -3059,11 +3103,11 @@ function sortLinked(list) {
     return list;
 }
 
-// z-order of a point given coords and size of the data bounding box
-function zOrder(x, y, minX, minY, size) {
+// z-order of a point given coords and inverse of the longer side of data bbox
+function zOrder(x, y, minX, minY, invSize) {
     // coords are transformed into non-negative 15-bit integer range
-    x = 32767 * (x - minX) / size;
-    y = 32767 * (y - minY) / size;
+    x = 32767 * (x - minX) * invSize;
+    y = 32767 * (y - minY) * invSize;
 
     x = (x | (x << 8)) & 0x00FF00FF;
     x = (x | (x << 4)) & 0x0F0F0F0F;
@@ -3083,7 +3127,7 @@ function getLeftmost(start) {
     var p = start,
         leftmost = start;
     do {
-        if (p.x < leftmost.x) { leftmost = p; }
+        if (p.x < leftmost.x || (p.x === leftmost.x && p.y < leftmost.y)) { leftmost = p; }
         p = p.next;
     } while (p !== start);
 
@@ -3099,8 +3143,10 @@ function pointInTriangle(ax, ay, bx, by, cx, cy, px, py) {
 
 // check if a diagonal between two polygon nodes is valid (lies in polygon interior)
 function isValidDiagonal(a, b) {
-    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) &&
-           locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b);
+    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) && // dones't intersect other edges
+           (locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b) && // locally visible
+            (area(a.prev, a, b.prev) || area(a, b.prev, b)) || // does not create opposite-facing sectors
+            equals(a, b) && area(a.prev, a, a.next) > 0 && area(b.prev, b, b.next) > 0); // special zero-length case
 }
 
 // signed area of a triangle
@@ -3115,10 +3161,28 @@ function equals(p1, p2) {
 
 // check if two segments intersect
 function intersects(p1, q1, p2, q2) {
-    if ((equals(p1, q1) && equals(p2, q2)) ||
-        (equals(p1, q2) && equals(p2, q1))) { return true; }
-    return area(p1, q1, p2) > 0 !== area(p1, q1, q2) > 0 &&
-           area(p2, q2, p1) > 0 !== area(p2, q2, q1) > 0;
+    var o1 = sign(area(p1, q1, p2));
+    var o2 = sign(area(p1, q1, q2));
+    var o3 = sign(area(p2, q2, p1));
+    var o4 = sign(area(p2, q2, q1));
+
+    if (o1 !== o2 && o3 !== o4) { return true; } // general case
+
+    if (o1 === 0 && onSegment(p1, p2, q1)) { return true; } // p1, q1 and p2 are collinear and p2 lies on p1q1
+    if (o2 === 0 && onSegment(p1, q2, q1)) { return true; } // p1, q1 and q2 are collinear and q2 lies on p1q1
+    if (o3 === 0 && onSegment(p2, p1, q2)) { return true; } // p2, q2 and p1 are collinear and p1 lies on p2q2
+    if (o4 === 0 && onSegment(p2, q1, q2)) { return true; } // p2, q2 and q1 are collinear and q1 lies on p2q2
+
+    return false;
+}
+
+// for collinear points p, q, r, check if point q lies on segment pr
+function onSegment(p, q, r) {
+    return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y);
+}
+
+function sign(num) {
+    return num > 0 ? 1 : num < 0 ? -1 : 0;
 }
 
 // check if a polygon diagonal intersects any polygon segments
@@ -3147,7 +3211,8 @@ function middleInside(a, b) {
         px = (a.x + b.x) / 2,
         py = (a.y + b.y) / 2;
     do {
-        if (((p.y > py) !== (p.next.y > py)) && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
+        if (((p.y > py) !== (p.next.y > py)) && p.next.y !== p.y &&
+                (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
             { inside = !inside; }
         p = p.next;
     } while (p !== a);
@@ -3204,14 +3269,14 @@ function removeNode(p) {
 }
 
 function Node(i, x, y) {
-    // vertice index in coordinates array
+    // vertex index in coordinates array
     this.i = i;
 
     // vertex coordinates
     this.x = x;
     this.y = y;
 
-    // previous and next vertice nodes in a polygon ring
+    // previous and next vertex nodes in a polygon ring
     this.prev = null;
     this.next = null;
 
@@ -3281,6 +3346,8 @@ earcut.flatten = function (data) {
     }
     return result;
 };
+
+earcut_1.default = default_1;
 
 var identity = function(x) {
   return x;
@@ -3541,6 +3608,8 @@ function mergeArcs(topology, objects) {
       }
 
       return arcs;
+    }).filter(function(arcs) {
+      return arcs.length > 0;
     })
   };
 }
@@ -3841,7 +3910,9 @@ function collapseTopology(topology, numPieces) {
   }
 
   if (numPieces > geometries.length) {
-    throw new RangeError("Can't collapse topology into " + numPieces + " pieces.");
+    throw new RangeError(
+      "Can't collapse topology into " + numPieces + " pieces."
+    );
   }
 
   return feature(topology, topology.objects.triangles).features.map(function (f) {
@@ -3874,12 +3945,18 @@ var triangulate = function(ring, numPieces) {
 };
 
 function cut(ring) {
-  var cuts = earcut_1(ring.reduce(function (arr, point) { return arr.concat( [point[0]], [point[1]]); }, [])),
+  var cuts = earcut_1(
+      ring.reduce(function (arr, point) { return arr.concat( [point[0]], [point[1]]); }, [])
+    ),
     triangles = [];
 
   for (var i = 0, l = cuts.length; i < l; i += 3) {
     // Save each triangle as segments [a, b], [b, c], [c, a]
-    triangles.push([[cuts[i], cuts[i + 1]], [cuts[i + 1], cuts[i + 2]], [cuts[i + 2], cuts[i]]]);
+    triangles.push([
+      [cuts[i], cuts[i + 1]],
+      [cuts[i + 1], cuts[i + 2]],
+      [cuts[i + 2], cuts[i]]
+    ]);
   }
 
   return triangles;
@@ -3954,7 +4031,13 @@ function separate(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { match: true, string: string, single: single, t0: t0, t1: t1 });
+  return interpolateSets(fromRings, toRings, {
+    match: true,
+    string: string,
+    single: single,
+    t0: t0,
+    t1: t1
+  });
 }
 
 function combine$1(
@@ -3967,8 +4050,14 @@ function combine$1(
   var string = ref.string; if ( string === void 0 ) string = true;
   var single = ref.single; if ( single === void 0 ) single = false;
 
-  var interpolators = separate(toShape, fromShapes, { maxSegmentLength: maxSegmentLength, string: string, single: single });
-  return single ? function (t) { return interpolators(1 - t); } : interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
+  var interpolators = separate(toShape, fromShapes, {
+    maxSegmentLength: maxSegmentLength,
+    string: string,
+    single: single
+  });
+  return single
+    ? function (t) { return interpolators(1 - t); }
+    : interpolators.map(function (fn) { return function (t) { return fn(1 - t); }; });
 }
 
 function interpolateAll(
@@ -4008,10 +4097,20 @@ function interpolateAll(
     t1 = toShapes.slice(0);
   }
 
-  return interpolateSets(fromRings, toRings, { string: string, single: single, t0: t0, t1: t1, match: false });
+  return interpolateSets(fromRings, toRings, {
+    string: string,
+    single: single,
+    t0: t0,
+    t1: t1,
+    match: false
+  });
 }
 
-function interpolateSets(fromRings, toRings, ref) {
+function interpolateSets(
+  fromRings,
+  toRings,
+  ref
+) {
   if ( ref === void 0 ) ref = {};
   var string = ref.string;
   var single = ref.single;
@@ -4019,8 +4118,11 @@ function interpolateSets(fromRings, toRings, ref) {
   var t1 = ref.t1;
   var match = ref.match;
 
-  var order = match ? pieceOrder(fromRings, toRings) : fromRings.map(function (d, i) { return i; }),
-    interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); });
+  var order = match
+      ? pieceOrder(fromRings, toRings)
+      : fromRings.map(function (d, i) { return i; }),
+    interpolators = order.map(function (d, i) { return interpolateRing(fromRings[d], toRings[i], string); }
+    );
 
   if (match && Array.isArray(t0)) {
     t0 = order.map(function (d) { return t0[d]; });
@@ -4089,17 +4191,26 @@ function toRect(fromShape, x, y, width, height, options) {
   return function (t) { return interpolator(1 - t); };
 }
 
-function fromShape(fromFn, toShape, original, perimeter, ref) {
+function fromShape(
+  fromFn,
+  toShape,
+  original,
+  perimeter,
+  ref
+) {
   if ( ref === void 0 ) ref = {};
   var maxSegmentLength = ref.maxSegmentLength; if ( maxSegmentLength === void 0 ) maxSegmentLength = 10;
   var string = ref.string; if ( string === void 0 ) string = true;
 
   var toRing = normalizeRing(toShape, maxSegmentLength),
-      fromRing,
-      interpolator;
+    fromRing,
+    interpolator;
 
   // Enforce maxSegmentLength on circle/rect perimeter too
-  if (isFiniteNumber(perimeter) && toRing.length < perimeter / maxSegmentLength) {
+  if (
+    isFiniteNumber(perimeter) &&
+    toRing.length < perimeter / maxSegmentLength
+  ) {
     addPoints(toRing, Math.ceil(perimeter / maxSegmentLength - toRing.length));
   }
 
@@ -4117,7 +4228,10 @@ function circlePoints(x, y, radius) {
   return function(ring) {
     var centroid = polygonCentroid$$1(ring),
       perimeter = polygonLength(ring.concat( [ring[0]])),
-      startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
+      startingAngle = Math.atan2(
+        ring[0][1] - centroid[1],
+        ring[0][0] - centroid[0]
+      ),
       along = 0;
 
     return ring.map(function (point, i) {
@@ -4125,7 +4239,9 @@ function circlePoints(x, y, radius) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      angle = startingAngle + 2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
+      angle =
+        startingAngle +
+        2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
       return [Math.cos(angle) * radius + x, Math.sin(angle) * radius + y];
     });
   };
@@ -4136,7 +4252,10 @@ function rectPoints(x, y, width, height) {
   return function(ring) {
     var centroid = polygonCentroid$$1(ring),
       perimeter = polygonLength(ring.concat( [ring[0]])),
-      startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
+      startingAngle = Math.atan2(
+        ring[0][1] - centroid[1],
+        ring[0][0] - centroid[0]
+      ),
       along = 0;
 
     if (startingAngle < 0) {
@@ -4150,7 +4269,8 @@ function rectPoints(x, y, width, height) {
         along += distance(point, ring[i - 1]);
       }
       var relative = rectPoint(
-        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1
+        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) %
+          1
       );
       return [x + relative[0] * width, y + relative[1] * height];
     });
@@ -4185,7 +4305,25 @@ function circlePath(x, y, radius) {
 function rectPath(x, y, width, height) {
   var r = x + width,
     b = y + height;
-  return "M" + x + "," + y + "L" + r + "," + y + "L" + r + "," + b + "L" + x + "," + b + "Z";
+  return (
+    "M" +
+    x +
+    "," +
+    y +
+    "L" +
+    r +
+    "," +
+    y +
+    "L" +
+    r +
+    "," +
+    b +
+    "L" +
+    x +
+    "," +
+    b +
+    "Z"
+  );
 }
 
 exports.interpolate = interpolate;

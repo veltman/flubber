@@ -3,13 +3,20 @@ import { addPoints } from "./add.js";
 import rotate from "./rotate.js";
 import { interpolatePoints } from "./math.js";
 
-export default function(fromShape, toShape, { maxSegmentLength = 10, string = true } = {}) {
+export default function(
+  fromShape,
+  toShape,
+  { maxSegmentLength = 10, string = true } = {}
+) {
   let fromRing = normalizeRing(fromShape, maxSegmentLength),
     toRing = normalizeRing(toShape, maxSegmentLength),
     interpolator = interpolateRing(fromRing, toRing, string);
 
   // Extra optimization for near either end with path strings
-  if (!string || (typeof fromShape !== "string" && typeof toShape !== "string")) {
+  if (
+    !string ||
+    (typeof fromShape !== "string" && typeof toShape !== "string")
+  ) {
     return interpolator;
   }
 

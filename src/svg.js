@@ -1,6 +1,5 @@
 import Path from "svgpath";
 import { svgPathProperties } from "svg-path-properties";
-import normalizeRing from "./normalize.js";
 import { isFiniteNumber } from "./math.js";
 import { INVALID_INPUT } from "./errors.js";
 
@@ -62,7 +61,6 @@ function exactRing(parsed) {
 function approximateRing(parsed, maxSegmentLength) {
   let ringPath = split(parsed)[0],
     ring = [],
-    props,
     len,
     m,
     numPoints = 3;
@@ -74,12 +72,16 @@ function approximateRing(parsed, maxSegmentLength) {
   m = measure(ringPath);
   len = m.getTotalLength();
 
-  if (maxSegmentLength && isFiniteNumber(maxSegmentLength) && maxSegmentLength > 0) {
+  if (
+    maxSegmentLength &&
+    isFiniteNumber(maxSegmentLength) &&
+    maxSegmentLength > 0
+  ) {
     numPoints = Math.max(numPoints, Math.ceil(len / maxSegmentLength));
   }
 
   for (let i = 0; i < numPoints; i++) {
-    let p = m.getPointAtLength(len * i / numPoints);
+    let p = m.getPointAtLength((len * i) / numPoints);
     ring.push([p.x, p.y]);
   }
 
@@ -93,7 +95,10 @@ function measure(d) {
   // Use native browser measurement if running in browser
   if (typeof window !== "undefined" && window && window.document) {
     try {
-      let path = window.document.createElementNS("http://www.w3.org/2000/svg", "path");
+      let path = window.document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
       path.setAttributeNS(null, "d", d);
       return path;
     } catch (e) {}

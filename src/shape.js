@@ -1,8 +1,12 @@
 import { polygonLength } from "d3-polygon";
-import { polygonCentroid, interpolatePoints, distance, isFiniteNumber } from "./math.js";
+import {
+  polygonCentroid,
+  interpolatePoints,
+  distance,
+  isFiniteNumber
+} from "./math.js";
 import normalizeRing from "./normalize.js";
 import { addPoints } from "./add.js";
-import { toPathString } from "./svg.js";
 
 export function fromCircle(x, y, radius, toShape, options) {
   return fromShape(
@@ -34,13 +38,22 @@ export function toRect(fromShape, x, y, width, height, options) {
   return t => interpolator(1 - t);
 }
 
-function fromShape(fromFn, toShape, original, perimeter, { maxSegmentLength = 10, string = true } = {}) {
+function fromShape(
+  fromFn,
+  toShape,
+  original,
+  perimeter,
+  { maxSegmentLength = 10, string = true } = {}
+) {
   let toRing = normalizeRing(toShape, maxSegmentLength),
-      fromRing,
-      interpolator;
+    fromRing,
+    interpolator;
 
   // Enforce maxSegmentLength on circle/rect perimeter too
-  if (isFiniteNumber(perimeter) && toRing.length < perimeter / maxSegmentLength) {
+  if (
+    isFiniteNumber(perimeter) &&
+    toRing.length < perimeter / maxSegmentLength
+  ) {
     addPoints(toRing, Math.ceil(perimeter / maxSegmentLength - toRing.length));
   }
 
@@ -58,7 +71,10 @@ export function circlePoints(x, y, radius) {
   return function(ring) {
     let centroid = polygonCentroid(ring),
       perimeter = polygonLength([...ring, ring[0]]),
-      startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
+      startingAngle = Math.atan2(
+        ring[0][1] - centroid[1],
+        ring[0][0] - centroid[0]
+      ),
       along = 0;
 
     return ring.map((point, i) => {
@@ -66,7 +82,9 @@ export function circlePoints(x, y, radius) {
       if (i) {
         along += distance(point, ring[i - 1]);
       }
-      angle = startingAngle + 2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
+      angle =
+        startingAngle +
+        2 * Math.PI * (perimeter ? along / perimeter : i / ring.length);
       return [Math.cos(angle) * radius + x, Math.sin(angle) * radius + y];
     });
   };
@@ -77,7 +95,10 @@ export function rectPoints(x, y, width, height) {
   return function(ring) {
     let centroid = polygonCentroid(ring),
       perimeter = polygonLength([...ring, ring[0]]),
-      startingAngle = Math.atan2(ring[0][1] - centroid[1], ring[0][0] - centroid[0]),
+      startingAngle = Math.atan2(
+        ring[0][1] - centroid[1],
+        ring[0][0] - centroid[0]
+      ),
       along = 0;
 
     if (startingAngle < 0) {
@@ -91,7 +112,8 @@ export function rectPoints(x, y, width, height) {
         along += distance(point, ring[i - 1]);
       }
       let relative = rectPoint(
-        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) % 1
+        (startingProgress + (perimeter ? along / perimeter : i / ring.length)) %
+          1
       );
       return [x + relative[0] * width, y + relative[1] * height];
     });
@@ -126,5 +148,23 @@ export function circlePath(x, y, radius) {
 export function rectPath(x, y, width, height) {
   let r = x + width,
     b = y + height;
-  return "M" + x + "," + y + "L" + r + "," + y + "L" + r + "," + b + "L" + x + "," + b + "Z";
+  return (
+    "M" +
+    x +
+    "," +
+    y +
+    "L" +
+    r +
+    "," +
+    y +
+    "L" +
+    r +
+    "," +
+    b +
+    "L" +
+    x +
+    "," +
+    b +
+    "Z"
+  );
 }

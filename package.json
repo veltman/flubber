@@ -16,7 +16,14 @@
     "type": "git",
     "url": "https://github.com/veltman/flubber.git"
   },
-  "keywords": ["shape", "morph", "tween", "svg", "animation", "triangulation"],
+  "keywords": [
+    "shape",
+    "morph",
+    "tween",
+    "svg",
+    "animation",
+    "triangulation"
+  ],
   "author": "Noah Veltman (@veltman)",
   "license": "MIT",
   "bugs": {
@@ -43,7 +50,11 @@
     "topojson-client": "^3.0.0"
   },
   "babel": {
-    "presets": ["env"],
-    "plugins": ["add-module-exports"]
+    "presets": [
+      "env"
+    ],
+    "plugins": [
+      "add-module-exports"
+    ]
   }
 }
